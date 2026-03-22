@@ -1,0 +1,82 @@
+/* ByteBalance Admin Dashboard Styles */
+.bb-admin-card {
+  background: white;
+  border-radius: 32px;
+  overflow: hidden;
+  border: 1px solid rgba(16, 185, 129, 0.1);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.bb-admin-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.bb-admin-table th {
+  padding: 1.5rem 2rem;
+  background: #f8fafc;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #64748b;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.bb-admin-table td {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #f1f5f9;
+  font-weight: 600;
+  color: #334155;
+}
+
+.bb-admin-table tr:hover td {
+  background: rgba(16, 185, 129, 0.02);
+}
+
+.bb-admin-header {
+  background: var(--bb-emerald-900);
+  padding: 4rem 3rem;
+  border-radius: 40px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 4rem;
+}
+
+.bb-admin-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), transparent);
+}
+
+.bb-admin-stat-small {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bb-btn-tab {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: 99px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  transition: all 0.3s ease;
+}
+
+.bb-btn-tab.active {
+  background: white;
+  color: var(--bb-emerald-900);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+}

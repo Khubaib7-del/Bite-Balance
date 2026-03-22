@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Environment Variables
+.env
+backend/.env
+frontend/.env
+
+# Logs
+*.log
+backend/*.log
+frontend/*.log
+ngrok/*.log
+ngrok-utf8.log
+pinggy.log
+serveo-new-utf8.log
+serveo-new.log
+serveo-utf8.log
+serveo.log
+
+# ngrok binary
+ngrok/ngrok.exe
+ngrok.zip
+
+# System files
+.DS_Store
+Thumbs.db

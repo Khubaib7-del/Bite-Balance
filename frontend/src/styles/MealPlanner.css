@@ -1,0 +1,200 @@
+/* ByteBalance Meal Planner Styles */
+.bb-planner-header {
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+}
+
+.bb-date-selector {
+  background: white;
+  border-radius: 24px;
+  padding: 0.5rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid rgba(16, 185, 129, 0.1);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.bb-date-selector:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.1);
+  border-color: var(--bb-emerald-300);
+}
+
+.bb-date-input {
+  border: none;
+  background: transparent;
+  font-weight: 800;
+  color: var(--bb-emerald-700);
+  font-size: 1.1rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.bb-meal-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(24px);
+  border-radius: 32px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(16, 185, 129, 0.1);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
+}
+
+.bb-meal-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 30px -5px rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.bb-meal-card-header {
+  padding: 1.5rem 2rem;
+  background: rgba(16, 185, 129, 0.05);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bb-meal-card-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bb-planner-item {
+  background: white;
+  border-radius: 20px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.bb-planner-item:hover {
+  border-color: var(--bb-emerald-200);
+  transform: scale(1.02);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.bb-food-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: var(--bb-green-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bb-emerald-500);
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.bb-food-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bb-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(16, 185, 129, 0.1);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.bb-modal-content {
+  background: white;
+  width: 100%;
+  max-width: 800px;
+  border-radius: 32px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(16, 185, 129, 0.1);
+}
+
+.bb-modal-header {
+  padding: 2rem;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bb-modal-body {
+  padding: 2rem;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.bb-search-input-group {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.bb-search-input-group .icon {
+  position: absolute;
+  left: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--bb-emerald-500);
+}
+
+.bb-search-input-group input {
+  width: 100%;
+  padding: 1.25rem 1.5rem 1.25rem 4rem;
+  background: #f8fafc;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.bb-search-input-group input:focus {
+  background: white;
+  border-color: var(--bb-emerald-500);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+  outline: none;
+}
+
+.food-result-card {
+  background: white;
+  border-radius: 20px;
+  padding: 1.25rem;
+  border: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.food-result-card:hover {
+  border-color: var(--bb-emerald-300);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1);
+}
+
+.qty-control {
+  background: #f1f5f9;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  padding: 0.25rem;
+}

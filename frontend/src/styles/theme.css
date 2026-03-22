@@ -1,0 +1,192 @@
+/* ByteBalance Design System Tokens */
+:root {
+  /* Fresh Green (Health & Nature) */
+  --bb-green-50: #f7fee7;
+  --bb-green-100: #ecfccb;
+  --bb-green-200: #d9f99d;
+  --bb-green-400: #a3e635;
+  --bb-green-500: #84cc16;
+  --bb-green-600: #65a30d;
+  --bb-green-900: #14532d;
+  
+  --bb-emerald-50: #ecfdf5;
+  --bb-emerald-400: #34d399;
+  --bb-emerald-500: #10b981;
+  --bb-emerald-600: #059669;
+  --bb-emerald-900: #064e3b;
+
+  --bb-teal-50: #f0fdfa;
+  --bb-teal-400: #2dd4bf;
+  --bb-teal-500: #14b8a6;
+  --bb-teal-600: #0d9488;
+
+  /* Energy Orange (Calories & Warmth) */
+  --bb-orange-50: #fff7ed;
+  --bb-orange-400: #fb923c;
+  --bb-orange-500: #f97316;
+  --bb-orange-600: #ea580c;
+
+  --bb-amber-400: #fbbf24;
+  --bb-amber-500: #f59e0b;
+
+  --bb-red-50: #fef2f2;
+  --bb-red-500: #ef4444;
+
+  /* Hydration Blue (Water) */
+  --bb-cyan-50: #ecfeff;
+  --bb-cyan-400: #22d3ee;
+  --bb-cyan-500: #06b6d4;
+
+  --bb-blue-50: #eff6ff;
+  --bb-blue-400: #60a5fa;
+  --bb-blue-500: #3b82f6;
+
+  /* Sunlight Yellow (Energy) */
+  --bb-yellow-500: #eab308;
+
+  /* Pink/Rose (Evening Meals) */
+  --bb-pink-400: #f472b6;
+  --bb-pink-500: #ec4899;
+  --bb-rose-400: #fb7185;
+  --bb-rose-500: #f43f5e;
+
+  /* Gradients */
+  --bb-grad-fresh: linear-gradient(135deg, var(--bb-green-500), var(--bb-emerald-500), var(--bb-teal-500));
+  --bb-grad-energy: linear-gradient(135deg, var(--bb-orange-500), var(--bb-red-500));
+  --bb-grad-hydration: linear-gradient(135deg, var(--bb-cyan-500), var(--bb-blue-500));
+  --bb-grad-sunlight: linear-gradient(135deg, var(--bb-amber-500), var(--bb-yellow-500));
+
+  /* Glassmorphism */
+  --bb-glass-bg: rgba(255, 255, 255, 0.7);
+  --bb-glass-blur: blur(24px);
+  --bb-glass-border: 1px solid rgba(16, 185, 129, 0.2);
+
+  /* Shadows */
+  --bb-shadow-emerald: 0 20px 25px -5px rgba(16, 185, 129, 0.1), 0 10px 10px -5px rgba(16, 185, 129, 0.04);
+  --bb-shadow-orange: 0 20px 25px -5px rgba(249, 115, 22, 0.15), 0 10px 10px -5px rgba(249, 115, 22, 0.1);
+}
+
+/* Color Utilities */
+.text-emerald-500 { color: var(--bb-emerald-500) !important; }
+.text-emerald-600 { color: var(--bb-emerald-600) !important; }
+.text-emerald-700 { color: #047857 !important; }
+.text-orange-500 { color: var(--bb-orange-500) !important; }
+.text-amber-500 { color: var(--bb-amber-500) !important; }
+.text-indigo-500 { color: #6366f1 !important; }
+.text-rose-500 { color: var(--bb-rose-500) !important; }
+.text-cyan-500 { color: var(--bb-cyan-500) !important; }
+.text-dark { color: #1e293b !important; }
+.text-muted { color: #64748b !important; }
+
+.bg-emerald-50 { background-color: var(--bb-emerald-50) !important; }
+.bg-emerald-100 { background-color: #d1fae5 !important; }
+.bg-orange-50 { background-color: var(--bb-orange-50) !important; }
+.bg-amber-50 { background-color: #fffbeb !important; }
+.bg-indigo-50 { background-color: #f5f3ff !important; }
+.bg-rose-50 { background-color: var(--bb-red-50) !important; }
+.bg-cyan-50 { background-color: var(--bb-cyan-50) !important; }
+.bg-light { background-color: #f8fafc !important; }
+
+.border-emerald-100 { border-color: #d1fae5 !important; }
+
+/* Font Weights */
+.fw-black { font-weight: 900 !important; }
+.extra-small { font-size: 0.7rem !important; }
+
+/* Base Body Styles */
+body {
+  background-color: #f8fafc;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #334155;
+}
+
+/* Glassmorphism Classes */
+.bb-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(15, 23, 42, 0.2);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.bb-modal-content {
+  background: white;
+  width: 100%;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bb-emerald-200);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bb-emerald-400);
+}
+
+/* Layout Utilities */
+.bb-glass {
+  background: var(--bb-glass-bg);
+  backdrop-filter: var(--bb-glass-blur);
+  -webkit-backdrop-filter: var(--bb-glass-blur);
+  border: var(--bb-glass-border);
+}
+
+.bb-gradient-text {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.bb-grad-green {
+  background: var(--bb-grad-fresh);
+}
+
+.bb-grad-orange {
+  background: var(--bb-grad-energy);
+}
+
+.bb-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.bb-card-hover:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--bb-shadow-emerald);
+}
+
+/* Dark Mode Preview (Alpha) */
+body.dark-mode-preview {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode-preview .bb-chart-card,
+body.dark-mode-preview .bb-stat-card,
+body.dark-mode-preview .bb-fresh-menu-card,
+body.dark-mode-preview .meal-item {
+  background-color: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode-preview .text-dark {
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode-preview .bg-light {
+  background-color: #334155 !important;
+}
