@@ -25,9 +25,11 @@ Welcome! If you've just cloned this repository, follow these steps to get your l
     ```bash
     cp .env.example .env
     ```
-3.  Edit `backend/.env` and set `DB_SERVER` to match your local SQL Server instance name.
-    - Common values: `localhost\SQLEXPRESS`, `(localdb)\MSSQLLocalDB`, or just your Computer Name.
-    - Example: `DB_SERVER=YOUR-PC-NAME\SQLEXPRESS`
+3.  Edit `backend/.env` and configure your database settings.
+    -   **DB_SERVER**: The address of your SQL Server (e.g., `.\SQLEXPRESS`).
+    -   **Authentication Choice**:
+        -   **Windows Authentication (Default)**: Leave `DB_USER` and `DB_PASSWORD` as placeholders or empty. The app will automatically use a Trusted Connection.
+        -   **SQL Server Authentication**: Set `DB_USER` (e.g., `sa`) and your `DB_PASSWORD`. The app will detect these and use SQL login.
 
 ## Running the Application
 
