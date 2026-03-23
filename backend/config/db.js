@@ -22,10 +22,32 @@ const poolPromise = sql.connect(config)
         return pool;
     })
     .catch(err => {
-        console.error('Database Connection Failed! ', err.message);
+        console.error('CRITICAL: Database Connection Failed!');
+        console.error('Error Message:', err.message);
+        
+        if (err.message.includes('ODBC Driver 17')) {
+            console.error('HINT: "ODBC Driver 17 for SQL Server" might be missing. Install it from Microsoft.');
+        } else if (err.message.includes('Server not found') || err.message.includes('getaddrinfo ENOTFOUND')) {
+            console.error(`HINT: Could not find server "${serverAddress}". Check your .env DB_SERVER setting.`);
+        } else if (err.message.includes('Login failed')) {
+            console.error('HINT: Authentication failed. Check your Trusted_Connection or credentials.');
+        }
+        
         return null;
     });
 
+/**
+ * Helper to ensure the pool is available before making requests
+ * Returns the pool or throws a descriptive error
+ */
+const getPool = async () => {
+    const pool = await poolPromise;
+    if (!pool) {
+        throw new Error('Database connection is not available. Check server logs.');
+    }
+    return pool;
+};
+
 module.exports = {
-    sql, poolPromise
+    sql, poolPromise, getPool
 };

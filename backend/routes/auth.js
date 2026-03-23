@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { poolPromise, sql } = require('../config/db');
+const { poolPromise, sql, getPool } = require('../config/db');
 
 // @route   POST /api/auth/register
 router.post('/register', async (req, res) => {
     const { username, email, password, adminCode } = req.body;
     try {
-        const pool = await poolPromise;
+        const pool = await getPool();
 
         // Check secret admin code if provided
         let role = 'USER';
@@ -58,7 +58,10 @@ router.post('/register', async (req, res) => {
 
         res.status(201).json({ message: 'User registered successfully' });
     } catch (err) {
-        console.error(err);
+        console.error('Registration Error:', err);
+        if (err.message.includes('Database connection is not available')) {
+            return res.status(503).json({ message: 'Database connection is down. Check server logs for details.' });
+        }
         res.status(500).send('Server error');
     }
 });
@@ -68,7 +71,7 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     try {
-        const pool = await poolPromise;
+        const pool = await getPool();
         const result = await pool.request()
             .input('email', sql.NVARCHAR, email)
             .query('SELECT * FROM Users WHERE Email = @email');
@@ -109,7 +112,10 @@ router.post('/login', async (req, res) => {
             });
         });
     } catch (err) {
-        console.error(err);
+        console.error('Login Error:', err);
+        if (err.message.includes('Database connection is not available')) {
+            return res.status(503).json({ message: 'Database connection is down. Check server logs for details.' });
+        }
         res.status(500).send('Server error');
     }
 });
@@ -119,7 +125,7 @@ router.post('/login', async (req, res) => {
 router.post('/admin/login', async (req, res) => {
     const { email, password } = req.body;
     try {
-        const pool = await poolPromise;
+        const pool = await getPool();
         const result = await pool.request()
             .input('email', sql.NVARCHAR, email)
             .query('SELECT * FROM Users WHERE Email = @email');
@@ -156,7 +162,10 @@ router.post('/admin/login', async (req, res) => {
             message: 'Admin credentials verified. Please enter your secure passkey.'
         });
     } catch (err) {
-        console.error(err);
+        console.error('Admin Login Error:', err);
+        if (err.message.includes('Database connection is not available')) {
+            return res.status(503).json({ message: 'Database connection is down. Check server logs for details.' });
+        }
         res.status(500).send('Server error');
     }
 });
@@ -165,7 +174,7 @@ router.post('/admin/login', async (req, res) => {
 router.post('/verify-code', async (req, res) => {
     const { email, code } = req.body;
     try {
-        const pool = await poolPromise;
+        const pool = await getPool();
         const result = await pool.request()
             .input('email', sql.NVARCHAR, email)
             .query('SELECT * FROM Users WHERE Email = @email');
@@ -210,7 +219,10 @@ router.post('/verify-code', async (req, res) => {
             });
         });
     } catch (err) {
-        console.error(err);
+        console.error('Verification Error:', err);
+        if (err.message.includes('Database connection is not available')) {
+            return res.status(503).json({ message: 'Database connection is down. Please check server logs for details.' });
+        }
         res.status(500).send('Server error');
     }
 });
