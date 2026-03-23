@@ -3,8 +3,22 @@ require('dotenv').config();
 
 const serverAddress = process.env.DB_SERVER || 'localhost';
 const database = process.env.DB_DATABASE || 'SmartMealPlanner';
+const dbUser = process.env.DB_USER;
+const dbPassword = process.env.DB_PASSWORD;
 
-const connectionString = `Driver={ODBC Driver 17 for SQL Server};Server=${serverAddress};Database=${database};Trusted_Connection=yes;`;
+// Flexible Connection String
+let connectionString = `Driver={ODBC Driver 17 for SQL Server};Server=${serverAddress};Database=${database};`;
+
+// Use SQL Authentication if a user and non-placeholder password are provided
+const isPlaceholderPassword = !dbPassword || dbPassword === 'your_password_here' || dbPassword === 'admin123';
+if (dbUser && dbUser !== 'sa_placeholder' && !isPlaceholderPassword) {
+    connectionString += `Uid=${dbUser};Pwd=${dbPassword};`;
+    console.log(`[DB] Attempting SQL Authentication (User: ${dbUser})`);
+} else {
+    // Default to Windows Authentication (Trusted Connection)
+    connectionString += `Trusted_Connection=yes;`;
+    console.log(`[DB] Attempting Windows Authentication (Trusted Connection)`);
+}
 
 const config = {
     connectionString: connectionString,
