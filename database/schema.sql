@@ -2,6 +2,18 @@
   Smart Meal Planner System - Database Schema (MS SQL Server)
 */
 
+USE master;
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'SmartMealPlanner')
+BEGIN
+    CREATE DATABASE SmartMealPlanner;
+END
+GO
+
+USE SmartMealPlanner;
+GO
+
 DROP TABLE IF EXISTS Password_Resets;
 DROP TABLE IF EXISTS MealPlanFoods;
 DROP TABLE IF EXISTS MealPlans;
