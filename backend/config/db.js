@@ -1,67 +1,92 @@
-const sql = require('mssql/msnodesqlv8');
+const { Pool, Client } = require('pg');
 require('dotenv').config();
 
-const serverAddress = process.env.DB_SERVER || 'localhost';
-const database = process.env.DB_DATABASE || 'SmartMealPlanner';
-const dbUser = process.env.DB_USER;
-const dbPassword = process.env.DB_PASSWORD;
+const dbHost = process.env.DB_HOST || 'localhost';
+const dbPort = Number(process.env.DB_PORT || 5432);
+const dbUser = process.env.DB_USER || 'postgres';
+const dbPassword = String(process.env.DB_PASSWORD ?? 'postgres');
+const dbName = process.env.DB_NAME || process.env.DB_DATABASE || 'SmartMealPlanner';
+const adminDbName = process.env.DB_ADMIN_DB || 'postgres';
 
-// Flexible Connection String
-let connectionString = `Driver={ODBC Driver 17 for SQL Server};Server=${serverAddress};Database=${database};`;
-
-// Use SQL Authentication if a user and non-placeholder password are provided
-const isPlaceholderPassword = !dbPassword || dbPassword === 'your_password_here' || dbPassword === 'admin123';
-if (dbUser && dbUser !== 'sa_placeholder' && !isPlaceholderPassword) {
-    connectionString += `Uid=${dbUser};Pwd=${dbPassword};`;
-    console.log(`[DB] Attempting SQL Authentication (User: ${dbUser})`);
-} else {
-    // Default to Windows Authentication (Trusted Connection)
-    connectionString += `Trusted_Connection=yes;`;
-    console.log(`[DB] Attempting Windows Authentication (Trusted Connection)`);
+if (!process.env.DB_PASSWORD) {
+    console.warn('[DB] DB_PASSWORD is not set. Using fallback password. Add a real value in backend/.env.');
 }
 
-const config = {
-    connectionString: connectionString,
-    options: {
-        enableArithAbort: true,
-        trustServerCertificate: true
+let pool = null;
+let initPromise = null;
+
+const baseConfig = {
+    host: dbHost,
+    port: dbPort,
+    user: dbUser,
+    password: dbPassword
+};
+
+const ensureDatabaseExists = async () => {
+    const adminClient = new Client({
+        ...baseConfig,
+        database: adminDbName
+    });
+
+    await adminClient.connect();
+    try {
+        const existing = await adminClient.query(
+            'SELECT 1 FROM pg_database WHERE datname = $1',
+            [dbName]
+        );
+
+        if (existing.rowCount === 0) {
+            const safeName = dbName.replace(/"/g, '""');
+            await adminClient.query(`CREATE DATABASE "${safeName}"`);
+            console.log(`[DB] Created database: ${dbName}`);
+        }
+    } finally {
+        await adminClient.end();
     }
 };
 
-console.log('Connecting to database:', serverAddress);
+const initDb = async () => {
+    if (pool) return pool;
+    if (initPromise) return initPromise;
 
-const poolPromise = sql.connect(config)
-    .then(pool => {
-        console.log('Connected to MSSQL successfully');
+    initPromise = (async () => {
+        await ensureDatabaseExists();
+
+        pool = new Pool({
+            ...baseConfig,
+            database: dbName,
+            max: 10,
+            idleTimeoutMillis: 30000
+        });
+
+        await pool.query('SELECT 1');
+        console.log(`[DB] Connected to PostgreSQL at ${dbHost}:${dbPort}/${dbName}`);
         return pool;
-    })
-    .catch(err => {
-        console.error('CRITICAL: Database Connection Failed!');
-        console.error('Error Message:', err.message);
-        
-        if (err.message.includes('ODBC Driver 17')) {
-            console.error('HINT: "ODBC Driver 17 for SQL Server" might be missing. Install it from Microsoft.');
-        } else if (err.message.includes('Server not found') || err.message.includes('getaddrinfo ENOTFOUND')) {
-            console.error(`HINT: Could not find server "${serverAddress}". Check your .env DB_SERVER setting.`);
-        } else if (err.message.includes('Login failed')) {
-            console.error('HINT: Authentication failed. Check your Trusted_Connection or credentials.');
-        }
-        
-        return null;
+    })().catch((err) => {
+        console.error('[DB] Connection/init failed:', err.message);
+        pool = null;
+        initPromise = null;
+        throw err;
     });
 
-/**
- * Helper to ensure the pool is available before making requests
- * Returns the pool or throws a descriptive error
- */
+    return initPromise;
+};
+
 const getPool = async () => {
-    const pool = await poolPromise;
-    if (!pool) {
+    const resolvedPool = await initDb();
+    if (!resolvedPool) {
         throw new Error('Database connection is not available. Check server logs.');
     }
-    return pool;
+    return resolvedPool;
+};
+
+const query = async (text, params = []) => {
+    const resolvedPool = await getPool();
+    return resolvedPool.query(text, params);
 };
 
 module.exports = {
-    sql, poolPromise, getPool
+    initDb,
+    getPool,
+    query
 };

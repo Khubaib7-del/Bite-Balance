@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Calendar, 
     Plus, 
     Trash2, 
-    ChevronLeft, 
-    ChevronRight, 
     Utensils, 
     Sparkles,
     Coffee,
@@ -16,13 +14,13 @@ import {
     X,
     Apple
 } from 'lucide-react';
-import { mealService, foodService, savedPlanService } from '../services/api';
+import { mealService, foodService } from '../services/api';
+import { getLocalISODate } from '../utils/date';
 import '../styles/MealPlanner.css';
 
 const MealPlanner = () => {
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [selectedDate, setSelectedDate] = useState(getLocalISODate());
     const [mealPlan, setMealPlan] = useState([]);
-    const [loading, setLoading] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
     const [foods, setFoods] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -30,17 +28,14 @@ const MealPlanner = () => {
     const [quantity, setQuantity] = useState(1);
     const [showAnalysis, setShowAnalysis] = useState(false);
 
-    const fetchMealPlan = async () => {
-        setLoading(true);
+    const fetchMealPlan = useCallback(async () => {
         try {
             const res = await mealService.getMealPlanByDate(selectedDate);
             setMealPlan(res.data.items || []);
         } catch (err) {
             console.error(err);
-        } finally {
-            setLoading(false);
         }
-    };
+    }, [selectedDate]);
 
     useEffect(() => {
         fetchMealPlan();
@@ -53,7 +48,7 @@ const MealPlanner = () => {
             }
         };
         fetchFoods();
-    }, [selectedDate]);
+    }, [selectedDate, fetchMealPlan]);
 
     const handleAddFood = async (foodId, mealType) => {
         try {

@@ -1,143 +1,131 @@
 /*
-  Smart Meal Planner System - Database Schema (MS SQL Server)
+  Smart Meal Planner System - Database Schema (PostgreSQL)
+  Run with psql so that \gexec and \connect commands are supported.
 */
 
-USE master;
-GO
+SELECT 'CREATE DATABASE "SmartMealPlanner"'
+WHERE NOT EXISTS (
+    SELECT FROM pg_database WHERE datname = 'SmartMealPlanner'
+)\gexec
 
-IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'SmartMealPlanner')
-BEGIN
-    CREATE DATABASE SmartMealPlanner;
-END
-GO
+\connect "SmartMealPlanner"
 
-USE SmartMealPlanner;
-GO
-
-DROP TABLE IF EXISTS Password_Resets;
-DROP TABLE IF EXISTS MealPlanFoods;
-DROP TABLE IF EXISTS MealPlans;
-DROP TABLE IF EXISTS Saved_Plan_Items;
-DROP TABLE IF EXISTS Saved_Meal_Plans;
-DROP TABLE IF EXISTS UserProfiles;
-DROP TABLE IF EXISTS FoodItems;
-DROP TABLE IF EXISTS Articles;
-DROP TABLE IF EXISTS SystemSettings;
-DROP TABLE IF EXISTS Users;
-
-
--- Create Users table
-CREATE TABLE Users (
-    UserID INT PRIMARY KEY IDENTITY(1,1),
-    Username NVARCHAR(50) NOT NULL UNIQUE,
-    Email NVARCHAR(100) NOT NULL UNIQUE,
-    PasswordHash NVARCHAR(MAX) NOT NULL,
-    Role NVARCHAR(20) DEFAULT 'USER', -- USER, ADMIN
-    VerificationCode NVARCHAR(10) NULL,
-    CodeExpires DATETIME NULL,
-    CreatedAt DATETIME DEFAULT GETDATE()
+CREATE TABLE IF NOT EXISTS "Users" (
+    "UserID" SERIAL PRIMARY KEY,
+    "Username" VARCHAR(50) NOT NULL UNIQUE,
+    "Email" VARCHAR(100) NOT NULL UNIQUE,
+    "PasswordHash" TEXT NOT NULL,
+    "Role" VARCHAR(20) DEFAULT 'USER',
+    "VerificationCode" VARCHAR(10) NULL,
+    "CodeExpires" TIMESTAMP NULL,
+    "CreatedAt" TIMESTAMP DEFAULT NOW()
 );
 
--- Create UserProfiles table
-CREATE TABLE UserProfiles (
-    ProfileID INT PRIMARY KEY IDENTITY(1,1),
-    UserID INT NOT NULL UNIQUE,
-    Weight FLOAT NULL,
-    Height FLOAT NULL,
-    Age INT NULL,
-    Gender NVARCHAR(20) NULL,
-    ActivityLevel NVARCHAR(50) NULL,
-    Goal NVARCHAR(50) NULL,
-    UpdatedAt DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS "UserProfiles" (
+    "ProfileID" SERIAL PRIMARY KEY,
+    "UserID" INT NOT NULL UNIQUE,
+    "Weight" DOUBLE PRECISION NULL,
+    "Height" DOUBLE PRECISION NULL,
+    "Age" INT NULL,
+    "Gender" VARCHAR(20) NULL,
+    "ActivityLevel" VARCHAR(50) NULL,
+    "Goal" VARCHAR(50) NULL,
+    "UpdatedAt" TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT "FK_UserProfiles_UserID"
+        FOREIGN KEY ("UserID") REFERENCES "Users"("UserID") ON DELETE CASCADE
 );
 
--- Create FoodItems table
-CREATE TABLE FoodItems (
-    FoodID INT PRIMARY KEY IDENTITY(1,1),
-    FoodName NVARCHAR(100) NOT NULL,
-    Calories FLOAT DEFAULT 0,
-    Protein FLOAT DEFAULT 0,
-    Carbohydrates FLOAT DEFAULT 0,
-    Fats FLOAT DEFAULT 0,
-    ImagePath NVARCHAR(MAX) NULL
+CREATE TABLE IF NOT EXISTS "FoodItems" (
+    "FoodID" SERIAL PRIMARY KEY,
+    "FoodName" VARCHAR(100) NOT NULL,
+    "Calories" DOUBLE PRECISION DEFAULT 0,
+    "Protein" DOUBLE PRECISION DEFAULT 0,
+    "Carbohydrates" DOUBLE PRECISION DEFAULT 0,
+    "Fats" DOUBLE PRECISION DEFAULT 0,
+    "ImagePath" TEXT NULL
 );
 
--- Create MealPlans table
-CREATE TABLE MealPlans (
-    MealPlanID INT PRIMARY KEY IDENTITY(1,1),
-    UserID INT NOT NULL,
-    Date DATE NOT NULL,
-    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+CREATE TABLE IF NOT EXISTS "MealPlans" (
+    "MealPlanID" SERIAL PRIMARY KEY,
+    "UserID" INT NOT NULL,
+    "Date" DATE NOT NULL,
+    CONSTRAINT "FK_MealPlans_UserID"
+        FOREIGN KEY ("UserID") REFERENCES "Users"("UserID") ON DELETE CASCADE,
+    CONSTRAINT "UQ_MealPlans_User_Date" UNIQUE ("UserID", "Date")
 );
 
--- Create MealPlanFoods table (Junction table)
-CREATE TABLE MealPlanFoods (
-    ID INT PRIMARY KEY IDENTITY(1,1),
-    MealPlanID INT NOT NULL,
-    FoodID INT NOT NULL,
-    Quantity FLOAT DEFAULT 1,
-    MealType NVARCHAR(20) DEFAULT 'Lunch', -- Breakfast, Lunch, Dinner, Snacks
-    FOREIGN KEY (MealPlanID) REFERENCES MealPlans(MealPlanID) ON DELETE CASCADE,
-    FOREIGN KEY (FoodID) REFERENCES FoodItems(FoodID)
+CREATE TABLE IF NOT EXISTS "MealPlanFoods" (
+    "ID" SERIAL PRIMARY KEY,
+    "MealPlanID" INT NOT NULL,
+    "FoodID" INT NOT NULL,
+    "Quantity" DOUBLE PRECISION DEFAULT 1,
+    "MealType" VARCHAR(20) DEFAULT 'Lunch',
+    CONSTRAINT "FK_MealPlanFoods_MealPlanID"
+        FOREIGN KEY ("MealPlanID") REFERENCES "MealPlans"("MealPlanID") ON DELETE CASCADE,
+    CONSTRAINT "FK_MealPlanFoods_FoodID"
+        FOREIGN KEY ("FoodID") REFERENCES "FoodItems"("FoodID") ON DELETE RESTRICT
 );
 
--- Create Saved_Meal_Plans table
-CREATE TABLE Saved_Meal_Plans (
-    PlanID INT PRIMARY KEY IDENTITY(1,1),
-    UserID INT NOT NULL,
-    PlanName NVARCHAR(100) NOT NULL,
-    CreatedAt DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+CREATE TABLE IF NOT EXISTS "Saved_Meal_Plans" (
+    "PlanID" SERIAL PRIMARY KEY,
+    "UserID" INT NOT NULL,
+    "PlanName" VARCHAR(100) NOT NULL,
+    "CreatedAt" TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT "FK_SavedMealPlans_UserID"
+        FOREIGN KEY ("UserID") REFERENCES "Users"("UserID") ON DELETE CASCADE
 );
 
--- Create Saved_Plan_Items table
-CREATE TABLE Saved_Plan_Items (
-    ID INT PRIMARY KEY IDENTITY(1,1),
-    PlanID INT NOT NULL,
-    FoodID INT NOT NULL,
-    Quantity FLOAT DEFAULT 1,
-    MealType NVARCHAR(20) DEFAULT 'Lunch',
-    FOREIGN KEY (PlanID) REFERENCES Saved_Meal_Plans(PlanID) ON DELETE CASCADE,
-    FOREIGN KEY (FoodID) REFERENCES FoodItems(FoodID)
+CREATE TABLE IF NOT EXISTS "Saved_Plan_Items" (
+    "ID" SERIAL PRIMARY KEY,
+    "PlanID" INT NOT NULL,
+    "FoodID" INT NOT NULL,
+    "Quantity" DOUBLE PRECISION DEFAULT 1,
+    "MealType" VARCHAR(20) DEFAULT 'Lunch',
+    CONSTRAINT "FK_SavedPlanItems_PlanID"
+        FOREIGN KEY ("PlanID") REFERENCES "Saved_Meal_Plans"("PlanID") ON DELETE CASCADE,
+    CONSTRAINT "FK_SavedPlanItems_FoodID"
+        FOREIGN KEY ("FoodID") REFERENCES "FoodItems"("FoodID") ON DELETE RESTRICT
 );
 
--- Create Articles table
-CREATE TABLE Articles (
-    ArticleID INT PRIMARY KEY IDENTITY(1,1),
-    Title NVARCHAR(200) NOT NULL,
-    Content NVARCHAR(MAX) NOT NULL,
-    Category NVARCHAR(50) NOT NULL,
-    CreatedAt DATETIME DEFAULT GETDATE()
+CREATE TABLE IF NOT EXISTS "Articles" (
+    "ArticleID" SERIAL PRIMARY KEY,
+    "Title" VARCHAR(200) NOT NULL,
+    "Content" TEXT NOT NULL,
+    "Category" VARCHAR(50) NOT NULL,
+    "CreatedAt" TIMESTAMP DEFAULT NOW()
 );
 
--- Create Password_Resets table
-CREATE TABLE Password_Resets (
-    ID INT PRIMARY KEY IDENTITY(1,1),
-    UserID INT NOT NULL,
-    Token NVARCHAR(255) NOT NULL,
-    ExpiresAt DATETIME NOT NULL,
-    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+CREATE TABLE IF NOT EXISTS "Password_Resets" (
+    "ID" SERIAL PRIMARY KEY,
+    "UserID" INT NOT NULL,
+    "Token" VARCHAR(255) NOT NULL,
+    "ExpiresAt" TIMESTAMP NOT NULL,
+    CONSTRAINT "FK_PasswordResets_UserID"
+        FOREIGN KEY ("UserID") REFERENCES "Users"("UserID") ON DELETE CASCADE
 );
 
--- Seed some initial food data
-INSERT INTO FoodItems (FoodName, Calories, Protein, Carbohydrates, Fats) VALUES
-('Chicken Breast (100g)', 165, 31, 0, 3.6),
-('Brown Rice (100g)', 111, 2.6, 23, 0.9),
-('Broccoli (100g)', 34, 2.8, 7, 0.4),
-('Oatmeal (100g)', 389, 16.9, 66, 6.9),
-('Egg (1 large)', 78, 6.3, 0.6, 5.3),
-('Banana (1 medium)', 105, 1.3, 27, 0.4),
-('Salmon (100g)', 208, 20, 0, 13),
-('Sweet Potato (100g)', 86, 1.6, 20, 0.1);
-
--- Create SystemSettings table
-CREATE TABLE SystemSettings (
-    SettingKey NVARCHAR(50) PRIMARY KEY,
-    SettingValue NVARCHAR(MAX) NOT NULL
+CREATE TABLE IF NOT EXISTS "SystemSettings" (
+    "SettingKey" VARCHAR(50) PRIMARY KEY,
+    "SettingValue" TEXT NOT NULL
 );
 
--- Seed initial admin registration code
-INSERT INTO SystemSettings (SettingKey, SettingValue) VALUES ('AdminRegistrationCode', 'ADMIN123');
+INSERT INTO "FoodItems" ("FoodName", "Calories", "Protein", "Carbohydrates", "Fats")
+SELECT v."FoodName", v."Calories", v."Protein", v."Carbohydrates", v."Fats"
+FROM (
+    VALUES
+        ('Chicken Breast (100g)', 165, 31, 0, 3.6),
+        ('Brown Rice (100g)', 111, 2.6, 23, 0.9),
+        ('Broccoli (100g)', 34, 2.8, 7, 0.4),
+        ('Oatmeal (100g)', 389, 16.9, 66, 6.9),
+        ('Egg (1 large)', 78, 6.3, 0.6, 5.3),
+        ('Banana (1 medium)', 105, 1.3, 27, 0.4),
+        ('Salmon (100g)', 208, 20, 0, 13),
+        ('Sweet Potato (100g)', 86, 1.6, 20, 0.1)
+) AS v("FoodName", "Calories", "Protein", "Carbohydrates", "Fats")
+WHERE NOT EXISTS (SELECT 1 FROM "FoodItems");
+
+INSERT INTO "SystemSettings" ("SettingKey", "SettingValue")
+VALUES ('AdminRegistrationCode', 'ADMIN123')
+ON CONFLICT ("SettingKey") DO NOTHING;
 
 

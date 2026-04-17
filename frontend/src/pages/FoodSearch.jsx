@@ -3,17 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Search, 
     Plus, 
-    Filter, 
-    ChevronRight, 
-    Zap, 
-    Flame, 
-    Droplets, 
     X,
     Sparkles,
     ChefHat,
     Salad
 } from 'lucide-react';
 import { foodService, mealService } from '../services/api';
+import { getLocalISODate } from '../utils/date';
 import '../styles/FoodSearch.css';
 
 const FoodSearch = () => {
@@ -29,7 +25,7 @@ const FoodSearch = () => {
         if (!selectedFood) return;
         setAdding(true);
         try {
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalISODate();
             let mealPlanId;
             const res = await mealService.getMealPlanByDate(today);
 

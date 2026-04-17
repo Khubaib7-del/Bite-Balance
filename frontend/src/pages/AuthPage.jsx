@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { authService } from '../services/api';
 import { User, Mail, Lock, ShieldCheck, ChevronRight, KeyRound, Utensils, Sparkles } from 'lucide-react';
@@ -87,7 +87,9 @@ const AuthPage = ({ setToken }) => {
                 adminCode: loginMode === 'ADMIN' ? registerData.adminCode : ''
             });
 
-            const loginResponse = await authService.login({
+            const loginFn = loginMode === 'ADMIN' ? authService.adminLogin : authService.login;
+
+            const loginResponse = await loginFn({
                 email: registerData.email,
                 password: registerData.password
             });
@@ -97,6 +99,7 @@ const AuthPage = ({ setToken }) => {
                 setShowTwoFactor(true);
                 setIsRegister(false);
                 setSuccessMsg('Registration successful! Please verify your identity.');
+                navigate('/login', { replace: true });
             } else {
                 localStorage.setItem('token', loginResponse.data.token);
                 localStorage.setItem('user', JSON.stringify(loginResponse.data.user));

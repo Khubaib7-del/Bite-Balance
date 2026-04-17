@@ -5,6 +5,7 @@ const ThreeBackground = () => {
     const mountRef = useRef(null);
 
     useEffect(() => {
+        const mountNode = mountRef.current;
         let scene, camera, renderer, particles;
 
         const init = () => {
@@ -17,8 +18,8 @@ const ThreeBackground = () => {
                 renderer.setSize(window.innerWidth, window.innerHeight);
                 renderer.setPixelRatio(window.devicePixelRatio);
 
-                if (mountRef.current) {
-                    mountRef.current.appendChild(renderer.domElement);
+                if (mountNode) {
+                    mountNode.appendChild(renderer.domElement);
                 }
             } catch (e) {
                 console.error("WebGL Initialization failed", e);
@@ -77,8 +78,8 @@ const ThreeBackground = () => {
         return () => {
             window.removeEventListener('resize', onWindowResize);
             if (cleanup) cleanup();
-            if (mountRef.current && renderer) {
-                mountRef.current.removeChild(renderer.domElement);
+            if (mountNode && renderer && renderer.domElement.parentNode === mountNode) {
+                mountNode.removeChild(renderer.domElement);
             }
             if (renderer) renderer.dispose();
         };

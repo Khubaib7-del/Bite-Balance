@@ -1,18 +1,18 @@
-const { poolPromise, sql } = require('../config/db');
+const { query } = require('../config/db');
 
 module.exports = async function (req, res, next) {
     try {
-        const pool = await poolPromise;
-        const result = await pool.request()
-            .input('userId', sql.INT, req.user.id)
-            .query('SELECT Role FROM Users WHERE UserID = @userId');
+        const result = await query(
+            'SELECT "Role" FROM "Users" WHERE "UserID" = $1',
+            [req.user.id]
+        );
 
-        if (result.recordset.length > 0 && result.recordset[0].Role === 'ADMIN') {
+        if (result.rowCount > 0 && result.rows[0].Role === 'ADMIN') {
             next();
         } else {
-            res.status(403).json({ message: 'Access denied: Admin only' });
+            return res.status(403).json({ message: 'Access denied: Admin only' });
         }
     } catch (err) {
-        res.status(500).send('Server Error');
+        return res.status(500).json({ message: 'Server Error' });
     }
 };

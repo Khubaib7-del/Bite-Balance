@@ -6,7 +6,6 @@ import {
     CheckCircle, 
     AlertCircle, 
     KeyRound, 
-    ChevronRight,
     Zap,
     ShieldCheck
 } from 'lucide-react';

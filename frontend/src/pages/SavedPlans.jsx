@@ -5,13 +5,12 @@ import {
     Trash2, 
     CheckCircle, 
     Clock, 
-    Calendar, 
-    ArrowRight, 
     Sparkles,
     Zap,
     History
 } from 'lucide-react';
 import { savedPlanService, mealService } from '../services/api';
+import { getLocalISODate } from '../utils/date';
 import '../styles/SavedPlans.css';
 
 const SavedPlans = () => {
@@ -47,19 +46,8 @@ const SavedPlans = () => {
 
     const handleLoad = async (planId) => {
         try {
-            const date = new Date().toISOString().split('T')[0];
-            const details = await savedPlanService.getPlanDetails(planId);
-            const mpRes = await mealService.createMealPlan(date);
-            const mealPlanId = mpRes.data.mealPlanId;
-
-            for (const item of details.data) {
-                await mealService.addFoodToMealPlan({
-                    mealPlanId,
-                    foodId: item.FoodID,
-                    quantity: item.Quantity,
-                    mealType: item.MealType
-                });
-            }
+            const date = getLocalISODate();
+            await mealService.applySavedPlan(planId, date);
             setMessage('Success! Template applied to your daily plan. ✨');
             setTimeout(() => setMessage(''), 5000);
         } catch (err) {
