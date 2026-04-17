@@ -23,6 +23,29 @@ api.interceptors.request.use(
     }
 );
 
+// Add a response interceptor to handle global errors
+api.interceptors.response.use(
+    (response) => {
+        return response;
+    },
+    (error) => {
+        // Handle 401 Unauthorized (e.g., token expired)
+        if (error.response && error.response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            // Force reload to trigger auth guard/redirect if necessary
+            window.location.href = '/login';
+        }
+        
+        // Handle 500 Server Errors
+        if (error.response && error.response.status >= 500) {
+            console.error('SERVER_ERROR:', error.response.data.message || 'A major system error occurred.');
+        }
+
+        return Promise.reject(error);
+    }
+);
+
 export const authService = {
     register: (userData) => api.post('/auth/register', userData),
     login: (credentials) => api.post('/auth/login', credentials),
@@ -44,6 +67,7 @@ export const foodService = {
 export const mealService = {
     createMealPlan: (date) => api.post('/mealplan', { date }),
     addFoodToMealPlan: (data) => api.post('/mealplan/add-food', data),
+    applySavedPlan: (planId, date) => api.post('/mealplan/apply-saved-plan', { planId, date }),
     getMealPlanByDate: (date) => api.get(`/mealplan/${date}`),
     getNutritionSummary: (date) => api.get(`/mealplan/nutrition-summary/${date}`),
     deleteMealPlanEntry: (entryId) => api.delete(`/mealplan/entry/${entryId}`),
@@ -60,7 +84,7 @@ export const savedPlanService = {
 export const adminService = {
     getUsers: () => api.get('/admin/users'),
     updateUser: (id, data) => api.put(`/admin/users/${id}`, data),
-    deleteUser: (id, data) => api.delete(`/admin/users/${id}`),
+    deleteUser: (id) => api.delete(`/admin/users/${id}`),
     getArticles: () => api.get('/admin/articles'),
     createArticle: (data) => api.post('/admin/articles', data),
     deleteArticle: (id) => api.delete(`/admin/articles/${id}`),
