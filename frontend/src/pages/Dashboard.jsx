@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
     Flame, 
     Droplets, 
@@ -20,7 +20,8 @@ import {
     Tooltip, 
     ResponsiveContainer 
 } from 'recharts';
-import { mealService, userService } from '../services/api';
+import { mealService } from '../services/api';
+import { getLocalISODate, getStoredUser } from '../utils/date';
 import '../styles/Dashboard.css';
 
 const Dashboard = () => {
@@ -29,13 +30,12 @@ const Dashboard = () => {
     const [calorieData, setCalorieData] = useState([]);
     const [user, setUser] = useState(null);
     const [hoveredMacro, setHoveredMacro] = useState(null);
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalISODate();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const userJson = localStorage.getItem('user');
-                setUser(JSON.parse(userJson));
+                setUser(getStoredUser());
 
                 const [sumRes, planRes, weeklyRes] = await Promise.all([
                     mealService.getNutritionSummary(today),

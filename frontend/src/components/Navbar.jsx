@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Bell, Search, User, Menu, Settings, Utensils, LogOut, ChevronRight, Sparkles, ShieldCheck } from 'lucide-react';
+import { Bell, Search, User, Menu, Settings, Utensils, LogOut, Sparkles, ShieldCheck } from 'lucide-react';
 import '../styles/Layout.css';
 
 const Navbar = ({ toggleSidebar }) => {

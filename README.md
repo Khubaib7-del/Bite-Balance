@@ -4,14 +4,15 @@ A professional web application for meal planning and nutrition tracking.
 
 ## Tech Stack
 - **Frontend**: React.js, Tailwind CSS, Recharts, Lucide React
-- **Backend**: Node.js, Express.js, JWT, MS SQL Server
-- **Database**: Microsoft SQL Server
+- **Backend**: Node.js, Express.js, JWT, PostgreSQL
+- **Database**: PostgreSQL
 
 ## Project Structure
 ```
 smart-meal-planner/
 ├── backend/            # Express.js API
-│   ├── config/         # Database connection
+│   ├── config/         # Database + JWT config
+│   ├── controllers/    # Route handlers
 │   ├── middleware/     # JWT authentication
 │   ├── routes/         # API endpoints
 │   └── server.js       # Entry point
@@ -35,11 +36,12 @@ To run this application locally, you should use two separate terminals (or a spl
    ```powershell
    cd smart-meal-planner\backend
    ```
-2. Start the development server:
+2. Install dependencies and start the development server:
    ```bash
+   npm install
    npm run dev
    ```
-   *Note: Ensure your local MS SQL Server (SQLEXPRESS) is running.*
+   *Note: Ensure your PostgreSQL server is running and `backend/.env` is configured.*
 
 ### 2. Frontend (React App)
 1. Open a **second** terminal and navigate to the frontend folder:
@@ -48,6 +50,7 @@ To run this application locally, you should use two separate terminals (or a spl
    ```
 2. Start the React application:
    ```bash
+   npm install
    npm start
    ```
    *The app will automatically open at `http://localhost:3000` (or `3002` if port 3000 is busy).*
@@ -69,5 +72,6 @@ Because the backend uses a local MS SQL database, traditional hosting like Verce
 ### Meal Plan
 - `POST /api/mealplan`: Create/Get meal plan ID for a date (Protected).
 - `POST /api/mealplan/add-food`: Add food to plan (Protected).
+- `POST /api/mealplan/apply-saved-plan`: Replace daily plan with saved template (Protected).
 - `GET /api/mealplan/:date`: Get daily plan (Protected).
 - `GET /api/mealplan/nutrition-summary/:date`: Get daily summary (Protected).

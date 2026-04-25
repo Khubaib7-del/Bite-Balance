@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     User, 
-    Mail, 
     Scale, 
     Ruler, 
     Calendar, 
-    ChevronRight, 
     Trophy, 
     Target,
     Activity,
@@ -16,6 +14,7 @@ import {
     Calculator
 } from 'lucide-react';
 import { userService } from '../services/api';
+import { getStoredUser } from '../utils/date';
 import '../styles/Dashboard.css'; // Reuse existing dashboard styles for consistency
 
 const Profile = () => {
@@ -35,9 +34,7 @@ const Profile = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const userJson = localStorage.getItem('user');
-                const userData = JSON.parse(userJson);
-                setUser(userData);
+                setUser(getStoredUser());
 
                 const res = await userService.getProfile();
                 if (res.data && Object.keys(res.data).length > 0) {

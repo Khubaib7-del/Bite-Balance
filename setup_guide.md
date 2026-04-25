@@ -5,18 +5,16 @@ Welcome! If you've just cloned this repository, follow these steps to get your l
 ## Prerequisites
 
 1.  **Node.js**: Install the latest LTS version.
-2.  **SQL Server**: Install SQL Server Express or Developer Edition.
-3.  **SQL Server Browser Service**: Ensure this service is **Running** and set to **Automatic**. (Essential for named instances like `SQLEXPRESS`).
-4.  **ODBC Driver 17**: This is **CRITICAL**. The application uses this specific driver to connect to SQL Server.
-    - [Download ODBC Driver 17 for SQL Server](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server)
+2.  **PostgreSQL**: Install PostgreSQL 14+ and keep the server running.
+3.  **psql CLI** (optional but recommended): Used to run `database/schema.sql` directly.
 
 ## Database Setup
 
-1.  Open SQL Server Management Studio (SSMS).
-2.  Connect to your local instance (usually `.\SQLEXPRESS`).
+1.  Open a terminal with access to `psql`.
+2.  Connect using `psql` to your local postgres instance.
 3.  Open `database/schema.sql`.
 4.  Execute the script (Press **F5**). 
-    - *Note: The script now automatically creates the `SmartMealPlanner` database for you.*
+    - *Note: The script checks if `SmartMealPlanner` exists, creates it if needed, then creates tables and seed data.*
 
 ## Configuration
 
@@ -26,10 +24,11 @@ Welcome! If you've just cloned this repository, follow these steps to get your l
     cp .env.example .env
     ```
 3.  Edit `backend/.env` and configure your database settings.
-    -   **DB_SERVER**: The address of your SQL Server (e.g., `.\SQLEXPRESS`).
-    -   **Authentication Choice**:
-        -   **Windows Authentication (Default)**: Leave `DB_USER` and `DB_PASSWORD` as placeholders or empty. The app will automatically use a Trusted Connection.
-        -   **SQL Server Authentication**: Set `DB_USER` (e.g., `sa`) and your `DB_PASSWORD`. The app will detect these and use SQL login.
+    -   **DB_HOST**: PostgreSQL host (usually `localhost`).
+    -   **DB_PORT**: PostgreSQL port (usually `5432`).
+    -   **DB_USER**: PostgreSQL username (usually `postgres`).
+    -   **DB_PASSWORD**: PostgreSQL password.
+    -   **DB_NAME**: Target application database (e.g., `SmartMealPlanner`).
 
 ## Running the Application
 
@@ -49,9 +48,9 @@ Welcome! If you've just cloned this repository, follow these steps to get your l
 ## Troubleshooting
 
 If you see a "Database connection is down" error in the browser:
-1.  **Check SQL Server Browser**: Open `services.msc`, find **SQL Server Browser**, right-click -> **Start**. Set to **Automatic**.
-2.  **Check Instance Name**: Ensure `DB_SERVER` in `.env` matches your instance (e.g., `DESKTOP-XXX\SQLEXPRESS`).
-3.  **Check ODBC Driver**: Verify "ODBC Driver 17" is listed in your installed programs.
+1.  **Check PostgreSQL Service**: Ensure postgres service is running.
+2.  **Check Credentials**: Confirm `DB_HOST`, `DB_PORT`, `DB_USER`, and `DB_PASSWORD` are correct in `.env`.
+3.  **Check DB Creation Rights**: Your `DB_USER` should have permission to create `DB_NAME` if it does not already exist.
 4.  **Run Diagnostics**:
     ```bash
     cd backend

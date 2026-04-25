@@ -6,7 +6,6 @@ import {
     Cell, 
     ResponsiveContainer, 
     Tooltip, 
-    Legend,
     Sector
 } from 'recharts';
 import { 
@@ -18,25 +17,14 @@ import {
     Activity, 
     Sparkles,
     TrendingUp,
-    Info,
-    ChevronDown,
     Zap
 } from 'lucide-react';
 import { mealService } from '../services/api';
+import { getLocalISODate } from '../utils/date';
 import '../styles/NutritionSummary.css';
 
 const renderActiveShape = (props) => {
-    const RADIAN = Math.PI / 180;
-    const { cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, value } = props;
-    const sin = Math.sin(-RADIAN * midAngle);
-    const cos = Math.cos(-RADIAN * midAngle);
-    const sx = cx + (outerRadius + 10) * cos;
-    const sy = cy + (outerRadius + 10) * sin;
-    const mx = cx + (outerRadius + 30) * cos;
-    const my = cy + (outerRadius + 30) * sin;
-    const ex = mx + (cos >= 0 ? 1 : -1) * 22;
-    const ey = my;
-    const textAnchor = cos >= 0 ? 'start' : 'end';
+    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload } = props;
 
     return (
         <g>
@@ -67,9 +55,8 @@ const renderActiveShape = (props) => {
 
 const NutritionSummary = () => {
     const [summary, setSummary] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [activeIndex, setActiveIndex] = useState(0);
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalISODate();
 
     useEffect(() => {
         const fetchSummary = async () => {
@@ -78,8 +65,6 @@ const NutritionSummary = () => {
                 setSummary(res.data);
             } catch (err) {
                 console.error('Failed to fetch summary', err);
-            } finally {
-                setLoading(false);
             }
         };
         fetchSummary();
