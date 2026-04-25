@@ -18,6 +18,7 @@ import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
 import './styles/index.css';
 import './styles/theme.css';
+import { getStoredUser } from './utils/date';
 
 // Helper components for routing
 const ProtectedRoute = ({ token, children, handleLogout }) => {
@@ -32,6 +33,19 @@ const PublicRoute = ({ token, children }) => {
     return <Navigate to="/" replace />;
   }
   return children;
+};
+
+const AdminRoute = ({ token, children, handleLogout }) => {
+  const user = getStoredUser();
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user?.role !== 'ADMIN') {
+    return <Navigate to="/" replace />;
+  }
+
+  return <UserLayout onLogout={handleLogout}>{children}</UserLayout>;
 };
 
 const App = () => {
@@ -86,7 +100,7 @@ const App = () => {
           <Route path="/summary" element={<ProtectedRoute token={token} handleLogout={handleLogout}><NutritionSummary /></ProtectedRoute>} />
           <Route path="/calculators" element={<ProtectedRoute token={token} handleLogout={handleLogout}><Calculators /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute token={token} handleLogout={handleLogout}><Notifications /></ProtectedRoute>} />
-          <Route path="/admin" element={<ProtectedRoute token={token} handleLogout={handleLogout}><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin" element={<AdminRoute token={token} handleLogout={handleLogout}><AdminDashboard /></AdminRoute>} />
           <Route path="/profile" element={<ProtectedRoute token={token} handleLogout={handleLogout}><Profile /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute token={token} handleLogout={handleLogout}><Settings /></ProtectedRoute>} />
 
