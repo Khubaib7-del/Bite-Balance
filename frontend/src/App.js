@@ -13,6 +13,10 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Calculators from './pages/Calculators';
 import AdminDashboard from './pages/AdminDashboard';
+import UserActivity from './pages/UserActivity';
+import ManageUsers from './pages/ManageUsers';
+import SystemStatus from './pages/SystemStatus';
+import PlannerHome from './pages/PlannerHome';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
@@ -62,16 +66,16 @@ const App = () => {
       setToken(isValid ? currentToken : null);
     };
     window.addEventListener('storage', handleStorageChange);
-    
+
     if (token) {
-        document.body.classList.add('body-auth');
+      document.body.classList.add('body-auth');
     } else {
-        document.body.classList.remove('body-auth');
+      document.body.classList.remove('body-auth');
     }
 
     return () => {
-        window.removeEventListener('storage', handleStorageChange);
-        document.body.classList.remove('body-auth');
+      window.removeEventListener('storage', handleStorageChange);
+      document.body.classList.remove('body-auth');
     };
   }, [token]);
 

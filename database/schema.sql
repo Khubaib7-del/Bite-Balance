@@ -128,4 +128,3 @@ INSERT INTO "SystemSettings" ("SettingKey", "SettingValue")
 VALUES ('AdminRegistrationCode', 'ADMIN123')
 ON CONFLICT ("SettingKey") DO NOTHING;
 
-

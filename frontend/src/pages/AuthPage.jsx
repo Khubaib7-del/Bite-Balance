@@ -57,8 +57,9 @@ const AuthPage = ({ setToken }) => {
 
             if (response.data.requiresVerification) {
                 setShowTwoFactor(true);
-                setSuccessMsg('Identity verified. Please enter your secure admin passkey.');
+                setSuccessMsg('Administrative access verified. Please enter your secure passkey.');
             } else {
+                localStorage.clear(); // Ensure no stale data remains
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('user', JSON.stringify(response.data.user));
                 setToken(response.data.token);
@@ -208,12 +209,12 @@ const AuthPage = ({ setToken }) => {
                                     </div>
                                 )}
                                 <h1 className="display-6 fw-bold text-dark">
-                                    {isRegister ? 'Create Account' : (showTwoFactor ? 'Security Check' : 'Sign In')}
+                                    {isRegister ? 'Account Registration' : (showTwoFactor ? 'Security Verification' : 'Portal Access')}
                                 </h1>
                                 <p className="text-muted">
                                     {isRegister 
-                                        ? 'Start your 7-day free trial today' 
-                                        : 'Enter your credentials to access your dashboard'}
+                                        ? 'Join ByteBalance for professional nutrition management.' 
+                                        : 'Please enter your credentials to authenticate.'}
                                 </p>
                             </div>
 
@@ -228,7 +229,7 @@ const AuthPage = ({ setToken }) => {
                                             <User className="input-icon" size={20} />
                                             <input 
                                                 type="text" 
-                                                placeholder="e.g. johndoe" 
+                                                placeholder="Enter username" 
                                                 required 
                                                 value={registerData.username} 
                                                 onChange={(e) => setRegisterData({...registerData, username: e.target.value})} 
@@ -243,7 +244,7 @@ const AuthPage = ({ setToken }) => {
                                         <Mail className="input-icon" size={20} />
                                         <input 
                                             type="email" 
-                                            placeholder="name@company.com" 
+                                            placeholder="yourname@example.com" 
                                             required 
                                             value={isRegister ? registerData.email : loginData.email} 
                                             onChange={(e) => isRegister ? setRegisterData({...registerData, email: e.target.value}) : setLoginData({...loginData, email: e.target.value})} 
@@ -252,7 +253,7 @@ const AuthPage = ({ setToken }) => {
                                 </div>
 
                                 <div className="auth-input-group">
-                                    <label>{showTwoFactor ? 'Admin Passkey' : 'Password'}</label>
+                                    <label>{showTwoFactor ? 'Security Access Key' : 'Password'}</label>
                                     <div className="auth-input-wrapper">
                                         {showTwoFactor ? (
                                             <KeyRound className="input-icon" size={20} style={{ color: '#10b981' }} />
@@ -261,7 +262,7 @@ const AuthPage = ({ setToken }) => {
                                         )}
                                         <input 
                                             type={showTwoFactor ? "text" : "password"}
-                                            placeholder={showTwoFactor ? "Enter ADMIN789" : "••••••••"} 
+                                            placeholder={showTwoFactor ? "Enter secure key" : "••••••••"} 
                                             required 
                                             value={showTwoFactor ? twoFactorToken : (isRegister ? registerData.password : loginData.password)} 
                                             onChange={(e) => {

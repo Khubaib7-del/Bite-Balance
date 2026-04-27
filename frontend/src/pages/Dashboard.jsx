@@ -24,6 +24,23 @@ import { mealService } from '../services/api';
 import { getLocalISODate, getStoredUser } from '../utils/date';
 import '../styles/Dashboard.css';
 
+const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bb-custom-tooltip">
+                <p className="extra-small fw-black mb-1 text-uppercase tracking-wider opacity-60">{label}</p>
+                {payload.map((entry, index) => (
+                    <div key={index} className="d-flex align-items-center gap-2 mb-1">
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: entry.color }}></div>
+                        <span className="small fw-black">{entry.name}: {entry.value}</span>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+    return null;
+};
+
 const Dashboard = () => {
     const [summary, setSummary] = useState(null);
     const [recentMeals, setRecentMeals] = useState([]);
@@ -155,8 +172,8 @@ const Dashboard = () => {
                         );
                     })}
                     {hoveredMacro && (
-                        <div className="mt-3 pt-2 border-top extra-small fw-bold text-center text-emerald-500 animate-pulse">
-                            ✨ Focused on {hoveredMacro}
+                        <div className="mt-3 pt-2 border-top extra-small fw-bold text-center text-emerald-600">
+                            Macro breakdown: {hoveredMacro}
                         </div>
                     )}
                 </div>
@@ -167,27 +184,28 @@ const Dashboard = () => {
 
     return (
         <div className="container-fluid p-0">
-            {/* SVG Filters for Glow */}
+            {/* SVG Filters for Glow - Reduced for professional look */}
             <svg style={{ height: 0, width: 0, position: 'absolute' }}>
                 <defs>
-                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="3" result="blur" />
+                    <filter id="glow" x="-10%" y="-10%" width="120%" height="120%">
+                        <feGaussianBlur stdDeviation="1.5" result="blur" />
                         <feComposite in="SourceGraphic" in2="blur" operator="over" />
                     </filter>
                     <linearGradient id="gradProtein" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="var(--bb-emerald-400)" />
-                        <stop offset="100%" stopColor="var(--bb-emerald-600)" />
+                        <stop offset="0%" stopColor="#059669" />
+                        <stop offset="100%" stopColor="#10b981" />
                     </linearGradient>
                     <linearGradient id="gradCarbs" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="var(--bb-amber-400)" />
-                        <stop offset="100%" stopColor="var(--bb-amber-600)" />
+                        <stop offset="0%" stopColor="#d97706" />
+                        <stop offset="100%" stopColor="#f59e0b" />
                     </linearGradient>
                     <linearGradient id="gradFats" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="var(--bb-orange-400)" />
-                        <stop offset="100%" stopColor="var(--bb-orange-600)" />
+                        <stop offset="0%" stopColor="#ea580c" />
+                        <stop offset="100%" stopColor="#f97316" />
                     </linearGradient>
                 </defs>
             </svg>
+
 
             {/* Welcome Banner */}
             <motion.div 
@@ -206,15 +224,15 @@ const Dashboard = () => {
                         >
                             👋
                         </motion.div>
-                        <h1 className="display-5 fw-black mb-1">Welcome back, {user?.username || 'Health Warrior'}!</h1>
-                        <p className="lead opacity-90 mb-0">You're doing amazing! Keep up the healthy lifestyle 🌿</p>
+                        <h1 className="display-5 fw-black mb-1">Welcome, {user?.username || 'User'}</h1>
+                        <p className="lead opacity-90 mb-0">Track your nutritional intake and monitor your health progress.</p>
                         
                         <div className="d-flex gap-3 mt-4">
                             <div className="bg-white bg-opacity-20 backdrop-blur rounded-pill px-3 py-1 border border-white border-opacity-30 small text-white fw-bold d-flex align-items-center gap-2 shadow-sm">
-                                <span>🎯</span> 75% to your goal!
+                                <span>📈</span> Performance Index: 8.5/10
                             </div>
                             <div className="bg-white bg-opacity-20 backdrop-blur rounded-pill px-3 py-1 border border-white border-opacity-30 small text-white fw-bold d-flex align-items-center gap-2 shadow-sm">
-                                <span>🔥</span> 7 day streak
+                                <span>📅</span> 7-Day Consistency
                             </div>
                         </div>
                     </div>
@@ -230,7 +248,7 @@ const Dashboard = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 * idx }}
-                        whileHover={{ y: -8 }}
+                        whileHover={{ y: -4 }}
                     >
                         <div className="icon-box" style={{ background: card.bgColor, color: card.color }}>
                             {card.icon}
@@ -254,12 +272,12 @@ const Dashboard = () => {
             </div>
 
             <div className="row g-4 mb-4">
-                {/* Today's Fresh Menu */}
+                {/* Today's Menu */}
                 <div className="col-12 col-xl-8">
                     <div className="bb-fresh-menu-card h-100">
                         <div className="d-flex align-items-center justify-content-between mb-4">
-                            <h3 className="h4 fw-black text-dark mb-0">Today's Fresh Menu 🍽️</h3>
-                            <span className="badge bb-grad-green rounded-pill px-3 py-2 fw-bold">{recentMeals.length} meals</span>
+                            <h3 className="h4 fw-black text-dark mb-0">Scheduled Meals 🍽️</h3>
+                            <span className="badge bb-grad-green rounded-pill px-3 py-2 fw-bold">{recentMeals.length} Items</span>
                         </div>
 
                         <div className="row g-3">
@@ -300,8 +318,8 @@ const Dashboard = () => {
                             ) : (
                                 <div className="text-center py-5 opacity-50">
                                     <Utensils size={48} className="mb-3" />
-                                    <p className="fw-bold">No meals logged for today yet.</p>
-                                    <button className="btn bb-grad-green text-white rounded-pill px-4 mt-2">Log Daily Plan</button>
+                                    <p className="fw-bold">No nutritional data logged for today.</p>
+                                    <button className="btn bb-grad-green text-white rounded-pill px-4 mt-2">Initialize Plan</button>
                                 </div>
                             )}
                         </div>
@@ -311,7 +329,7 @@ const Dashboard = () => {
                 {/* Nutrition Balance */}
                 <div className="col-12 col-xl-4">
                     <div className="bb-chart-card h-100" style={{ background: 'linear-gradient(to bottom, #ffffff, var(--bb-emerald-50))' }}>
-                        <h3 className="h5 fw-black text-dark mb-4">Nutrition Balance 🥗</h3>
+                        <h3 className="h5 fw-black text-dark mb-4">Nutritional Distribution 🥗</h3>
                         
                         {[
                             { label: "Protein", current: summary?.TotalProtein || 0, goal: 120, unit: "g", icon: "💪", grad: "var(--bb-grad-fresh)" },
@@ -337,11 +355,12 @@ const Dashboard = () => {
                             </div>
                         ))}
 
-                        <div className="mt-5 p-3 rounded-4" style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                            <p className="small fw-bold text-emerald-600 mb-0">🌟 You're crushing it! Keep eating fresh & healthy!</p>
+                        <div className="mt-5 p-3 rounded-4" style={{ background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                            <p className="small fw-bold text-emerald-600 mb-0">Maintaining a balanced macro distribution is key to your nutritional goals.</p>
                         </div>
                     </div>
                 </div>
+
             </div>
 
             {/* Weekly Progress JOURNEY */}
@@ -365,6 +384,25 @@ const Dashboard = () => {
                                         <linearGradient id="colorCal" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
                                             <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                        </linearGradient>
+                                        <filter id="glow">
+                                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                            <feMerge>
+                                                <feMergeNode in="coloredBlur"/>
+                                                <feMergeNode in="SourceGraphic"/>
+                                            </feMerge>
+                                        </filter>
+                                        <linearGradient id="gradProtein" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#10b981" />
+                                            <stop offset="100%" stopColor="#059669" />
+                                        </linearGradient>
+                                        <linearGradient id="gradCarbs" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#f59e0b" />
+                                            <stop offset="100%" stopColor="#d97706" />
+                                        </linearGradient>
+                                        <linearGradient id="gradFats" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stopColor="#f97316" />
+                                            <stop offset="100%" stopColor="#ea580c" />
                                         </linearGradient>
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />

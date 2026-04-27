@@ -1,0 +1,14 @@
+﻿ssh : Warning: Permanently added 'serveo.net' 
+(RSA) to the list of known hosts.
+At line:1 char:1
++ ssh -o StrictHostKeyChecking=no -R 
+80:localhost:5000 serveo.net > ser ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (W 
+   arning: Perman...of known hosts.:String) [  
+  ], RemoteException
+    + FullyQualifiedErrorId : NativeCommandErr 
+   or
+ 
+[32mForwarding HTTP traffic from https://01db958329905461-149-71-34-110.serveousercontent.com
