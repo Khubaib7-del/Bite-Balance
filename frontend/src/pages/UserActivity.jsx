@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Activity, Clock, User, Filter } from 'lucide-react';
-import { adminService } from '../services/api';
 import '../styles/Admin.css';
 
 const UserActivity = () => {
-    const [activities, setActivities] = useState([
+    const activities = [
         { id: 1, user: 'Admin', action: 'System Backup', time: '2 mins ago', icon: <Activity size={18} /> },
         { id: 2, user: 'JohnDoe', action: 'Updated Profile', time: '15 mins ago', icon: <User size={18} /> },
         { id: 3, user: 'JaneSmith', action: 'Created Meal Plan', time: '1 hour ago', icon: <Clock size={18} /> },
         { id: 4, user: 'MikeRoss', action: 'Logged Nutrition', time: '3 hours ago', icon: <Activity size={18} /> },
-    ]);
+    ];
 
     return (
         <div className="admin-container">
