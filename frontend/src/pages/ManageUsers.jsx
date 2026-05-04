@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Users, UserPlus, Search, Trash2, Edit, Shield } from 'lucide-react';
 import { adminService } from '../services/api';
 import '../styles/Admin.css';

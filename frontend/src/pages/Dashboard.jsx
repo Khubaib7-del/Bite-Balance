@@ -24,23 +24,6 @@ import { mealService } from '../services/api';
 import { getLocalISODate, getStoredUser } from '../utils/date';
 import '../styles/Dashboard.css';
 
-const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-        return (
-            <div className="bb-custom-tooltip">
-                <p className="extra-small fw-black mb-1 text-uppercase tracking-wider opacity-60">{label}</p>
-                {payload.map((entry, index) => (
-                    <div key={index} className="d-flex align-items-center gap-2 mb-1">
-                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: entry.color }}></div>
-                        <span className="small fw-black">{entry.name}: {entry.value}</span>
-                    </div>
-                ))}
-            </div>
-        );
-    }
-    return null;
-};
-
 const Dashboard = () => {
     const [summary, setSummary] = useState(null);
     const [recentMeals, setRecentMeals] = useState([]);

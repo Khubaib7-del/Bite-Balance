@@ -2,18 +2,12 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-    LayoutDashboard, 
-    Search, 
-    CalendarDays, 
-    PieChart, 
-    BookOpen, 
     ShieldCheck, 
     LogOut,
     Sparkles,
     ChevronRight,
     Settings,
     User,
-    Bell,
     Activity,
     Users,
     Server
@@ -29,14 +23,6 @@ const Sidebar = ({ onLogout, collapsed, showMobile, toggleMobile }) => {
         console.error("User parsing failed", e);
     }
     const isAdmin = user?.role === 'ADMIN';
-
-    const userNavItems = [
-        { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
-        { name: 'Meal Planner', path: '/planner', icon: <CalendarDays size={20} /> },
-        { name: 'Food Search', path: '/search', icon: <Search size={20} /> },
-        { name: 'Analytics', path: '/summary', icon: <PieChart size={20} /> },
-        { name: 'Saved Plans', path: '/saved-plans', icon: <BookOpen size={20} /> },
-    ];
 
     const adminNavItems = [
         { name: 'Admin Dashboard', path: '/admin', icon: <ShieldCheck size={20} /> },
