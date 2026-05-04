@@ -28,11 +28,15 @@ app.get('/api/health', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.use(express.static(path.join(__dirname, '../frontend/build')));
+const shouldServeFrontend = process.env.SERVE_FRONTEND === 'true';
 
-app.use((req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
-});
+if (shouldServeFrontend) {
+    app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+    app.use((req, res) => {
+        res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+    });
+}
 
 const startServer = async () => {
     try {
@@ -46,4 +50,8 @@ const startServer = async () => {
     }
 };
 
-startServer();
+if (require.main === module) {
+    startServer();
+}
+
+module.exports = app;
