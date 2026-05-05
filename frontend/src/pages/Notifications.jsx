@@ -1,44 +1,45 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Bell, CheckCircle, Info, AlertTriangle, ChevronRight, Sparkles, Trash2, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { userService } from '../services/api';
 import '../styles/Dashboard.css';
 
 const Notifications = () => {
-    const notifications = [
-        { 
-            id: 1, 
-            type: 'success', 
-            title: 'Goal Achieved! 🎉', 
-            desc: "You've reached 75% of your daily calorie goal. Keep it up!", 
-            time: '2 hours ago',
-            icon: <CheckCircle className="text-emerald-500" />
-        },
-        { 
-            id: 2, 
-            type: 'info', 
-            title: 'New Meal Plan Ready', 
-            desc: "Your nutritional plan for tomorrow has been generated based on your profile.", 
-            time: '5 hours ago',
-            icon: <Info className="text-primary" />
-        },
-        { 
-            id: 3, 
-            type: 'warning', 
-            title: 'Low Hydration Alert', 
-            desc: "You haven't logged any water intake in the last 4 hours. Stay hydrated!", 
-            time: '1 day ago',
-            icon: <AlertTriangle className="text-amber-500" />
-        },
-        { 
-            id: 4, 
-            type: 'success', 
-            title: 'Profile Updated', 
-            desc: "Your health metrics were successfully synchronized with the backend.", 
-            time: '2 days ago',
-            icon: <Sparkles className="text-emerald-500" />
-        }
-    ];
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const res = await userService.getNotifications();
+                setNotifications(res.data || []);
+            } catch (err) {
+                console.error('Notifications load failed', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchNotifications();
+    }, []);
+
+    const preparedNotifications = useMemo(() => {
+        const iconMap = {
+            success: <CheckCircle className="text-emerald-500" />,
+            info: <Info className="text-primary" />,
+            warning: <AlertTriangle className="text-amber-500" />,
+            sparkle: <Sparkles className="text-emerald-500" />
+        };
+
+        return notifications.map((notif, index) => ({
+            id: `${notif.type}-${index}`,
+            title: notif.title,
+            desc: notif.description,
+            time: notif.createdAt ? new Date(notif.createdAt).toLocaleString() : 'Just now',
+            icon: iconMap[notif.type] || iconMap.info
+        }));
+    }, [notifications]);
 
     return (
         <div className="container-fluid p-0">
@@ -80,8 +81,11 @@ const Notifications = () => {
                         </div>
 
                         <div className="p-0">
-                            {notifications.length > 0 ? (
-                                notifications.map((notif, idx) => (
+                            {loading && (
+                                <div className="text-center py-5 opacity-50">Loading notifications...</div>
+                            )}
+                            {!loading && preparedNotifications.length > 0 ? (
+                                preparedNotifications.map((notif, idx) => (
                                     <motion.div 
                                         key={notif.id}
                                         initial={{ opacity: 0, x: -20 }}
@@ -102,7 +106,7 @@ const Notifications = () => {
                                         <ChevronRight size={18} className="text-muted opacity-30" />
                                     </motion.div>
                                 ))
-                            ) : (
+                            ) : !loading && (
                                 <div className="text-center py-5 opacity-50">
                                     <Bell size={48} className="mb-3" />
                                     <p className="fw-bold">No new notifications.</p>

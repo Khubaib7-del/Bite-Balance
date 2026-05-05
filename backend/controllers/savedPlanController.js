@@ -1,4 +1,5 @@
 const { getPool, query } = require('../config/db');
+const { logActivity } = require('../utils/activity');
 
 const savePlan = async (req, res) => {
     const { planName, items = [] } = req.body;
@@ -28,6 +29,12 @@ const savePlan = async (req, res) => {
         }
 
         await client.query('COMMIT');
+        await logActivity({
+            userId: req.user.id,
+            type: 'PLAN_SAVED',
+            detail: planName,
+            meta: { planId }
+        });
         return res.json({ message: 'Plan saved successfully', planId });
     } catch (err) {
         await client.query('ROLLBACK');
@@ -74,6 +81,12 @@ const deletePlan = async (req, res) => {
             'DELETE FROM "Saved_Meal_Plans" WHERE "PlanID" = $1 AND "UserID" = $2',
             [req.params.id, req.user.id]
         );
+        await logActivity({
+            userId: req.user.id,
+            type: 'PLAN_DELETED',
+            detail: `Deleted plan ${req.params.id}`,
+            meta: { planId: req.params.id }
+        });
         return res.json({ message: 'Plan deleted' });
     } catch (err) {
         console.error('Delete plan error:', err);

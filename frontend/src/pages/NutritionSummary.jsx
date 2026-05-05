@@ -215,21 +215,21 @@ const NutritionSummary = () => {
                         <h3 className="h5 fw-black text-dark mb-4">Goal Achievements 🏅</h3>
                         <div className="row g-5">
                             {[
-                                { label: "Hydration", current: 75, target: 100, unit: "%", color: "var(--bb-grad-hydration)" },
-                                { label: "Activity", current: 85, target: 100, unit: "%", color: "var(--bb-grad-energy)" },
-                                { label: "Sleep Quality", current: 60, target: 100, unit: "%", color: "var(--bb-grad-sunlight)" }
+                                { label: "Calories", current: summary?.TotalCalories || 0, target: 2000, unit: "kcal", color: "var(--bb-grad-energy)" },
+                                { label: "Protein", current: summary?.TotalProtein || 0, target: 120, unit: "g", color: "var(--bb-grad-fresh)" },
+                                { label: "Carbs", current: summary?.TotalCarbohydrates || 0, target: 250, unit: "g", color: "var(--bb-grad-sunlight)" }
                             ].map((goal, i) => (
                                 <div key={i} className="col-12 col-md-4">
                                     <div className="d-flex justify-content-between mb-2">
                                         <span className="fw-black text-dark">{goal.label}</span>
-                                        <span className="fw-bold text-muted">{goal.current} / {goal.target} {goal.unit}</span>
+                                        <span className="fw-bold text-muted">{goal.current.toFixed(0)} / {goal.target} {goal.unit}</span>
                                     </div>
                                     <div className="bb-progress-bar-container" style={{ height: '14px' }}>
                                         <motion.div 
                                             className="bb-progress-bar-fill"
                                             style={{ background: goal.color }}
                                             initial={{ width: 0 }}
-                                            animate={{ width: `${goal.current}%` }}
+                                            animate={{ width: `${Math.min((goal.current / goal.target) * 100, 100)}%` }}
                                             transition={{ duration: 1.5, delay: 0.8 + i * 0.1 }}
                                         />
                                     </div>

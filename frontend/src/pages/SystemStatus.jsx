@@ -1,15 +1,40 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Server, Database, Shield, Cpu, HardDrive } from 'lucide-react';
+import { adminService } from '../services/api';
 import '../styles/Admin.css';
 
 const SystemStatus = () => {
-    const stats = [
-        { label: 'API Server', status: 'Operational', color: 'text-success', icon: <Server size={24} />, load: '12%' },
-        { label: 'SQL Database', status: 'Connected', color: 'text-success', icon: <Database size={24} />, load: '5%' },
-        { label: 'Authentication Service', status: 'Operational', color: 'text-success', icon: <Shield size={24} />, load: '2%' },
-        { label: 'Image Storage', status: 'Operational', color: 'text-success', icon: <HardDrive size={24} />, load: '28%' },
-    ];
+    const [status, setStatus] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStatus = async () => {
+            try {
+                const res = await adminService.getSystemStatus();
+                setStatus(res.data);
+            } catch (err) {
+                console.error('System status load failed', err);
+                setStatus({ api: { status: 'Degraded' }, database: { status: 'Unavailable' }, metrics: {} });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStatus();
+    }, []);
+
+    const stats = useMemo(() => {
+        const apiStatus = status?.api?.status || 'Unknown';
+        const dbStatus = status?.database?.status || 'Unknown';
+
+        return [
+            { label: 'API Server', status: apiStatus, color: apiStatus === 'Operational' ? 'text-success' : 'text-danger', icon: <Server size={24} />, load: `${status?.metrics?.mealPlans ?? 0} plans` },
+            { label: 'SQL Database', status: dbStatus, color: dbStatus === 'Connected' ? 'text-success' : 'text-danger', icon: <Database size={24} />, load: `${status?.metrics?.users ?? 0} users` },
+            { label: 'Authentication Service', status: 'Operational', color: 'text-success', icon: <Shield size={24} />, load: `${status?.metrics?.savedPlans ?? 0} saved` },
+            { label: 'Food Catalog', status: 'Operational', color: 'text-success', icon: <HardDrive size={24} />, load: `${status?.metrics?.foods ?? 0} items` }
+        ];
+    }, [status]);
 
     return (
         <div className="admin-container">
@@ -17,7 +42,9 @@ const SystemStatus = () => {
             <p className="text-muted small mb-4">Infrastructure monitoring and service status overview.</p>
 
             <div className="row g-4 mb-5">
-                {stats.map((stat, idx) => (
+                {loading ? (
+                    <div className="text-center py-5 text-muted">Loading system status...</div>
+                ) : stats.map((stat, idx) => (
                     <div key={idx} className="col-12 col-md-6 col-xl-3">
                         <motion.div 
                             className="bb-chart-card h-100 text-center"
@@ -51,14 +78,19 @@ const SystemStatus = () => {
                     <div className="bb-chart-card">
                         <h5 className="fw-black mb-4">Recent Updates</h5>
                         <div className="small border-start ps-3 py-2 mb-3">
-                            <p className="fw-bold mb-0">v1.2.4 Deployment</p>
-                            <p className="text-muted mb-0">Applied security patches to Auth service.</p>
-                            <span className="extra-small text-muted">2 hours ago</span>
+                            <p className="fw-bold mb-0">User Base Snapshot</p>
+                            <p className="text-muted mb-0">Total users: {status?.metrics?.users ?? 0}</p>
+                            <span className="extra-small text-muted">{new Date().toLocaleDateString()}</span>
                         </div>
                         <div className="small border-start ps-3 py-2 mb-3">
-                            <p className="fw-bold mb-0">Database Optimization</p>
-                            <p className="text-muted mb-0">Re-indexed UserActivity table for performance.</p>
-                            <span className="extra-small text-muted">Yesterday</span>
+                            <p className="fw-bold mb-0">Planning Activity</p>
+                            <p className="text-muted mb-0">Meal plans stored: {status?.metrics?.mealPlans ?? 0}</p>
+                            <span className="extra-small text-muted">{new Date().toLocaleDateString()}</span>
+                        </div>
+                        <div className="small border-start ps-3 py-2 mb-3">
+                            <p className="fw-bold mb-0">Nutrition Catalog</p>
+                            <p className="text-muted mb-0">Food items tracked: {status?.metrics?.foods ?? 0}</p>
+                            <span className="extra-small text-muted">{new Date().toLocaleDateString()}</span>
                         </div>
                     </div>
                 </div>

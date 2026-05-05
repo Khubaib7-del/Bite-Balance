@@ -8,8 +8,11 @@ router.get('/users', auth, admin, adminController.getUsers);
 router.put('/users/:id', auth, admin, adminController.updateUser);
 router.delete('/users/:id', auth, admin, adminController.deleteUser);
 
+router.get('/activity', auth, admin, adminController.getActivity);
+router.get('/system-status', auth, admin, adminController.getSystemStatus);
+
 router.post('/articles', auth, admin, adminController.createArticle);
-router.get('/articles', adminController.getArticles);
+router.get('/articles', auth, admin, adminController.getArticles);
 router.delete('/articles/:id', auth, admin, adminController.deleteArticle);
 
 router.get('/settings/admin-code', auth, admin, adminController.getAdminCode);

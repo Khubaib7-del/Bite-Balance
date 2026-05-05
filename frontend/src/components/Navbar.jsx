@@ -1,6 +1,8 @@
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Bell, Search, User, Menu, Settings, Utensils, LogOut, Sparkles, ShieldCheck } from 'lucide-react';
+import { userService } from '../services/api';
 import '../styles/Layout.css';
 
 const Navbar = ({ toggleSidebar }) => {
@@ -18,11 +20,21 @@ const Navbar = ({ toggleSidebar }) => {
         window.location.reload();
     };
 
-    const notifications = [
-        { id: 1, text: 'Welcome to ByteBalance!', time: 'Just now', icon: '🎉' },
-        { id: 2, text: 'New meal plan generated.', time: '2h ago', icon: '🍱' },
-        { id: 3, text: 'You hit your protein goal!', time: '1d ago', icon: '💪' }
-    ];
+    const [notifications, setNotifications] = useState([]);
+
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const res = await userService.getNotifications();
+                setNotifications(res.data || []);
+            } catch (err) {
+                console.error('Navbar notifications failed', err);
+                setNotifications([]);
+            }
+        };
+
+        fetchNotifications();
+    }, []);
 
     return (
         <header className="bb-header">
@@ -101,13 +113,13 @@ const Navbar = ({ toggleSidebar }) => {
                         <li className="mb-2 pb-2 border-bottom">
                             <h6 className="fw-bold mb-0">Notifications</h6>
                         </li>
-                        {notifications.map(n => (
-                            <li key={n.id}>
+                        {notifications.slice(0, 3).map((n, index) => (
+                            <li key={`${n.title}-${index}`}>
                                 <button className="dropdown-item d-flex gap-3 p-3 rounded-3 mb-1">
-                                    <span className="fs-4">{n.icon}</span>
+                                    <span className="fs-4">{n.type === 'success' ? '✅' : n.type === 'warning' ? '⚠️' : 'ℹ️'}</span>
                                     <div>
-                                        <p className="mb-0 small fw-bold">{n.text}</p>
-                                        <span className="text-muted extra-small">{n.time}</span>
+                                        <p className="mb-0 small fw-bold">{n.title}</p>
+                                        <span className="text-muted extra-small">{n.createdAt ? new Date(n.createdAt).toLocaleString() : 'Just now'}</span>
                                     </div>
                                 </button>
                             </li>

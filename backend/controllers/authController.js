@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { query } = require('../config/db');
+const { logActivity } = require('../utils/activity');
 const { signJwt } = require('../config/jwt');
 
 const buildUserPayload = (user) => ({
@@ -49,6 +50,12 @@ const register = async (req, res) => {
                     ['ADMIN', existingUser.UserID]
                 );
 
+                await logActivity({
+                    userId: existingUser.UserID,
+                    type: 'ADMIN_UPGRADED',
+                    detail: 'User upgraded to admin via registration code'
+                });
+
                 return res.status(200).json({
                     message: 'Account successfully upgraded to Administrative status. You can now login via the Admin Portal.'
                 });
@@ -57,10 +64,16 @@ const register = async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
         const passwordHash = await bcrypt.hash(password, 10);
-        await query(
-            'INSERT INTO "Users" ("Username", "Email", "PasswordHash", "Role") VALUES ($1, $2, $3, $4)',
+        const insertResult = await query(
+            'INSERT INTO "Users" ("Username", "Email", "PasswordHash", "Role") VALUES ($1, $2, $3, $4) RETURNING "UserID"',
             [username, email, passwordHash, role]
         );
+
+        await logActivity({
+            userId: insertResult.rows[0].UserID,
+            type: 'USER_REGISTERED',
+            detail: `Registered as ${role}`
+        });
 
         return res.status(201).json({ message: 'User registered successfully' });
     } catch (err) {
@@ -99,6 +112,12 @@ const login = async (req, res) => {
             }
         });
 
+        await logActivity({
+            userId: user.UserID,
+            type: 'USER_LOGIN',
+            detail: 'User login successful'
+        });
+
         return res.json({
             token,
             user: buildUserPayload(user)
@@ -132,19 +151,22 @@ const adminLogin = async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        const verificationCode = generateAdminVerificationCode();
-        const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+        const token = signJwt({
+            user: {
+                id: user.UserID,
+                role: user.Role
+            }
+        });
 
-        await query(
-            'UPDATE "Users" SET "VerificationCode" = $1, "CodeExpires" = $2 WHERE "UserID" = $3',
-            [verificationCode, expiresAt, user.UserID]
-        );
-
-        console.log(`[SECURE ADMIN LOGIN] Passkey for ${user.Email}: ${verificationCode}`);
+        await logActivity({
+            userId: user.UserID,
+            type: 'ADMIN_LOGIN',
+            detail: 'Admin login successful'
+        });
 
         return res.json({
-            requiresVerification: true,
-            message: 'Admin credentials verified. Please enter your secure passkey.'
+            token,
+            user: buildUserPayload(user)
         });
     } catch (err) {
         console.error('Admin Login Error:', err);
@@ -185,6 +207,12 @@ const verifyCode = async (req, res) => {
                 id: user.UserID,
                 role: user.Role
             }
+        });
+
+        await logActivity({
+            userId: user.UserID,
+            type: 'ADMIN_LOGIN',
+            detail: 'Admin verification successful'
         });
 
         return res.json({

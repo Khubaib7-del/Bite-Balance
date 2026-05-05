@@ -14,7 +14,7 @@ import {
     X,
     Apple
 } from 'lucide-react';
-import { mealService, foodService } from '../services/api';
+import { mealService, foodService, savedPlanService } from '../services/api';
 import { getLocalISODate } from '../utils/date';
 import '../styles/MealPlanner.css';
 
@@ -27,6 +27,12 @@ const MealPlanner = () => {
     const [activeMealType, setActiveMealType] = useState('Lunch');
     const [quantity, setQuantity] = useState(1);
     const [showAnalysis, setShowAnalysis] = useState(false);
+    const [showSaveModal, setShowSaveModal] = useState(false);
+    const [planName, setPlanName] = useState('');
+    const [savingPlan, setSavingPlan] = useState(false);
+    const [saveMessage, setSaveMessage] = useState('');
+    const [addError, setAddError] = useState('');
+    const [addingFood, setAddingFood] = useState(false);
 
     const fetchMealPlan = useCallback(async () => {
         try {
@@ -51,6 +57,8 @@ const MealPlanner = () => {
     }, [selectedDate, fetchMealPlan]);
 
     const handleAddFood = async (foodId, mealType) => {
+        setAddError('');
+        setAddingFood(true);
         try {
             let mealPlanId;
             const res = await mealService.getMealPlanByDate(selectedDate);
@@ -71,6 +79,9 @@ const MealPlanner = () => {
             setQuantity(1);
         } catch (err) {
             console.error('Add food error:', err);
+            setAddError(err.response?.data?.message || 'Unable to add food. Please try again.');
+        } finally {
+            setAddingFood(false);
         }
     };
 
@@ -80,6 +91,36 @@ const MealPlanner = () => {
             setMealPlan(mealPlan.filter(item => item.EntryID !== entryId));
         } catch (err) {
             console.error('Delete error:', err);
+        }
+    };
+
+    const handleSavePlan = async () => {
+        if (!planName.trim()) {
+            setSaveMessage('Please enter a plan name.');
+            return;
+        }
+
+        if (mealPlan.length === 0) {
+            setSaveMessage('Add meals before saving a plan.');
+            return;
+        }
+
+        setSavingPlan(true);
+        setSaveMessage('');
+        try {
+            const items = mealPlan.map(item => ({
+                FoodID: item.FoodID,
+                Quantity: item.Quantity,
+                MealType: item.MealType
+            }));
+            await savedPlanService.savePlan(planName.trim(), items);
+            setSaveMessage('Plan saved successfully.');
+            setPlanName('');
+        } catch (err) {
+            console.error('Save plan error:', err);
+            setSaveMessage('Failed to save plan.');
+        } finally {
+            setSavingPlan(false);
         }
     };
 
@@ -206,9 +247,15 @@ const MealPlanner = () => {
                         <h4 className="fw-black mb-1">Total Daily Intake</h4>
                         <p className="text-muted small mb-0">You've consumed {mealPlan.reduce((acc, m) => acc + (m.Calories * m.Quantity), 0).toFixed(0)} kcal out of your 2,000 kcal goal.</p>
                     </div>
-                    <div className="col-md-4 text-md-end mt-3 mt-md-0">
+                    <div className="col-md-4 text-md-end mt-3 mt-md-0 d-flex gap-2 justify-content-md-end">
                         <button 
-                            className="btn btn-dark rounded-pill px-5 py-3 fw-bold hover-shadow-lg"
+                            className="btn btn-outline-dark rounded-pill px-4 py-3 fw-bold"
+                            onClick={() => setShowSaveModal(true)}
+                        >
+                            Save Plan
+                        </button>
+                        <button 
+                            className="btn btn-dark rounded-pill px-4 py-3 fw-bold hover-shadow-lg"
                             onClick={() => setShowAnalysis(true)}
                         >
                             Analyze Plan ✨
@@ -216,6 +263,58 @@ const MealPlanner = () => {
                     </div>
                 </div>
             </motion.div>
+
+            {/* Save Plan Modal */}
+            <AnimatePresence>
+                {showSaveModal && (
+                    <motion.div 
+                        className="bb-modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <motion.div 
+                            className="bb-modal-content"
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                        >
+                            <div className="bb-modal-header">
+                                <div>
+                                    <h2 className="h4 fw-black text-dark mb-1">Save Your Plan</h2>
+                                    <p className="small text-muted mb-0">Store this day to reuse later.</p>
+                                </div>
+                                <button className="btn btn-light rounded-circle p-2" onClick={() => setShowSaveModal(false)}>
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="bb-modal-body">
+                                <div className="mb-3">
+                                    <label className="extra-small fw-black text-muted text-uppercase mb-2">Plan Name</label>
+                                    <input
+                                        className="form-control bg-light border-0 p-3 fw-bold"
+                                        placeholder="e.g., Lean Weekday Plan"
+                                        value={planName}
+                                        onChange={(e) => setPlanName(e.target.value)}
+                                    />
+                                </div>
+                                {saveMessage && (
+                                    <div className={`alert ${saveMessage.includes('success') ? 'alert-success' : 'alert-warning'} rounded-4 fw-bold border-0`}>{saveMessage}</div>
+                                )}
+                                <motion.button
+                                    className="btn bb-grad-green text-white w-100 py-3 rounded-pill fw-black"
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    disabled={savingPlan}
+                                    onClick={handleSavePlan}
+                                >
+                                    {savingPlan ? 'Saving...' : 'Save Plan'}
+                                </motion.button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Analysis Modal */}
             <AnimatePresence>
@@ -321,13 +420,19 @@ const MealPlanner = () => {
                                     </div>
                                 </div>
 
+                                {addError && (
+                                    <div className="alert alert-warning rounded-4 fw-bold border-0">
+                                        {addError}
+                                    </div>
+                                )}
+
                                 <div className="row g-3">
                                     {(searchQuery ? foods.filter(f => f.FoodName.toLowerCase().includes(searchQuery.toLowerCase())) : foods.slice(0, 15)).map(f => (
                                         <div key={f.FoodID} className="col-12 col-md-6 col-lg-4">
                                             <motion.div 
                                                 className="food-result-card"
                                                 whileHover={{ y: -4 }}
-                                                onClick={() => handleAddFood(f.FoodID, activeMealType)}
+                                                onClick={() => !addingFood && handleAddFood(f.FoodID, activeMealType)}
                                             >
                                                 <div className="d-flex justify-content-between align-items-start">
                                                     <div className="rounded-3 p-2 bg-emerald-50 text-emerald-500">

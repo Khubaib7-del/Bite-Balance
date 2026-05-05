@@ -73,6 +73,17 @@ const FoodSearch = () => {
         return () => clearTimeout(timeoutId);
     }, [query]);
 
+    const getNutritionScore = (food) => {
+        const calories = Number(food.Calories) || 0;
+        const protein = Number(food.Protein) || 0;
+        const carbs = Number(food.Carbohydrates) || 0;
+        const fats = Number(food.Fats) || 0;
+
+        if (calories === 0) return 0;
+        const densityScore = ((protein * 4 + carbs * 2 + fats * 2) / calories) * 5;
+        return Math.min(10, Math.max(1, densityScore));
+    };
+
     return (
         <div className="container-fluid p-0">
             {/* Header */}
@@ -126,7 +137,7 @@ const FoodSearch = () => {
                                     <h3 className="h5 fw-black text-dark mb-1 text-truncate" style={{ maxWidth: '180px' }}>{food.FoodName}</h3>
                                     <div className="d-flex align-items-center gap-2">
                                         <Sparkles size={12} className="text-amber-500" />
-                                        <span className="extra-small text-muted fw-bold">NUTRITION SCORE: 9.2</span>
+                                        <span className="extra-small text-muted fw-bold">NUTRITION SCORE: {getNutritionScore(food).toFixed(1)}</span>
                                     </div>
                                 </div>
                                 <motion.button 

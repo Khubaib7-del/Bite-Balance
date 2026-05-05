@@ -6,15 +6,14 @@ Welcome! If you've just cloned this repository, follow these steps to get your l
 
 1.  **Node.js**: Install the latest LTS version.
 2.  **PostgreSQL**: Install PostgreSQL 14+ and keep the server running.
-3.  **psql CLI** (optional but recommended): Used to run `database/schema.sql` directly.
+3.  **pgAdmin** or **psql CLI**: Use pgAdmin Query Tool or psql to run `database/schema.sql`.
 
 ## Database Setup
 
-1.  Open a terminal with access to `psql`.
-2.  Connect using `psql` to your local postgres instance.
-3.  Open `database/schema.sql`.
-4.  Execute the script (Press **F5**). 
-    - *Note: The script checks if `SmartMealPlanner` exists, creates it if needed, then creates tables and seed data.*
+1.  Create the `SmartMealPlanner` database in pgAdmin.
+2.  Select the database and open Query Tool.
+3.  Open `database/schema.sql` and run it.
+    - *Note: This creates tables and seed data in the selected database.*
 
 ## Configuration
 
@@ -30,6 +29,7 @@ Welcome! If you've just cloned this repository, follow these steps to get your l
     -   **DB_PASSWORD**: PostgreSQL password.
     -   **DB_NAME**: Target application database (e.g., `SmartMealPlanner`).
 
+
 ## Running the Application
 
 1.  **Backend**:
@@ -44,6 +44,18 @@ Welcome! If you've just cloned this repository, follow these steps to get your l
     npm install
     npm start
     ```
+
+## Seed Admin User (Optional)
+
+Run this once after setting your backend `.env`:
+
+```bash
+cd backend
+set SEED_ADMIN_EMAIL=admin@example.com
+set SEED_ADMIN_PASSWORD=StrongPasswordHere
+set SEED_ADMIN_USERNAME=admin
+npm run seed-admin
+```
 
 ## Troubleshooting
 

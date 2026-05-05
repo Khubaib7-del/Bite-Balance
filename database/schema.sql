@@ -1,14 +1,7 @@
 /*
-  Smart Meal Planner System - Database Schema (PostgreSQL)
-  Run with psql so that \gexec and \connect commands are supported.
+    Smart Meal Planner System - Database Schema (PostgreSQL)
+    Run this in pgAdmin after selecting the SmartMealPlanner database.
 */
-
-SELECT 'CREATE DATABASE "SmartMealPlanner"'
-WHERE NOT EXISTS (
-    SELECT FROM pg_database WHERE datname = 'SmartMealPlanner'
-)\gexec
-
-\connect "SmartMealPlanner"
 
 CREATE TABLE IF NOT EXISTS "Users" (
     "UserID" SERIAL PRIMARY KEY,
@@ -108,6 +101,19 @@ CREATE TABLE IF NOT EXISTS "SystemSettings" (
     "SettingKey" VARCHAR(50) PRIMARY KEY,
     "SettingValue" TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS "UserActivity" (
+    "ActivityID" SERIAL PRIMARY KEY,
+    "UserID" INT NULL,
+    "Type" VARCHAR(50) NOT NULL,
+    "Detail" TEXT NULL,
+    "Meta" JSONB NULL,
+    "CreatedAt" TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT "FK_UserActivity_UserID"
+        FOREIGN KEY ("UserID") REFERENCES "Users"("UserID") ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS "IX_UserActivity_CreatedAt" ON "UserActivity" ("CreatedAt" DESC);
 
 INSERT INTO "FoodItems" ("FoodName", "Calories", "Protein", "Carbohydrates", "Fats")
 SELECT v."FoodName", v."Calories", v."Protein", v."Carbohydrates", v."Fats"

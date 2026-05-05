@@ -107,7 +107,7 @@ const Dashboard = () => {
             color: "var(--bb-orange-500)", 
             bgColor: "var(--bb-orange-50)",
             grad: "var(--bb-grad-energy)",
-            progress: (summary?.TotalCalories / 2000) * 100
+            progress: summary?.TotalCalories ? (summary.TotalCalories / 2000) * 100 : 0
         },
         { 
             title: "Protein", 
@@ -118,31 +118,38 @@ const Dashboard = () => {
             color: "var(--bb-emerald-500)", 
             bgColor: "var(--bb-emerald-50)",
             grad: "var(--bb-grad-fresh)",
-            progress: (summary?.TotalProtein / 120) * 100
+            progress: summary?.TotalProtein ? (summary.TotalProtein / 120) * 100 : 0
         },
         { 
-            title: "Hydration", 
-            value: "6", 
-            target: "8", 
-            unit: "glasses", 
+            title: "Carbs", 
+            value: summary?.TotalCarbohydrates?.toFixed(0) || "0", 
+            target: "250", 
+            unit: "g", 
+            icon: <Coffee />, 
+            color: "var(--bb-amber-500)", 
+            bgColor: "var(--bb-amber-50)",
+            grad: "var(--bb-grad-sunlight)",
+            progress: summary?.TotalCarbohydrates ? (summary.TotalCarbohydrates / 250) * 100 : 0
+        },
+        { 
+            title: "Fats", 
+            value: summary?.TotalFats?.toFixed(0) || "0", 
+            target: "70", 
+            unit: "g", 
             icon: <Droplets />, 
             color: "var(--bb-cyan-500)", 
             bgColor: "var(--bb-cyan-50)",
             grad: "var(--bb-grad-hydration)",
-            progress: 75
-        },
-        { 
-            title: "Energy", 
-            value: "90", 
-            target: "100", 
-            unit: "%", 
-            icon: <Sparkles />, 
-            color: "var(--bb-amber-500)", 
-            bgColor: "var(--bb-orange-50)",
-            grad: "var(--bb-grad-sunlight)",
-            progress: 90
+            progress: summary?.TotalFats ? (summary.TotalFats / 70) * 100 : 0
         }
     ];
+
+    const activeDays = calorieData.filter(day => day.calories > 0).length;
+    const consistency = Math.round((activeDays / 7) * 100);
+    const avgCalories = calorieData.length > 0
+        ? calorieData.reduce((acc, day) => acc + day.calories, 0) / calorieData.length
+        : 0;
+    const performanceIndex = Math.min(10, (avgCalories / 2000) * 10).toFixed(1);
 
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
@@ -228,11 +235,11 @@ const Dashboard = () => {
                         <p className="lead opacity-90 mb-0">Track your nutritional intake and monitor your health progress.</p>
                         
                         <div className="d-flex gap-3 mt-4">
-                            <div className="bg-white bg-opacity-20 backdrop-blur rounded-pill px-3 py-1 border border-white border-opacity-30 small text-white fw-bold d-flex align-items-center gap-2 shadow-sm">
-                                <span>📈</span> Performance Index: 8.5/10
+                            <div className="bg-white bg-opacity-80 backdrop-blur rounded-pill px-3 py-1 border border-white border-opacity-60 small text-dark fw-bold d-flex align-items-center gap-2 shadow-sm">
+                                <span>📈</span> Performance Index: {performanceIndex}/10
                             </div>
-                            <div className="bg-white bg-opacity-20 backdrop-blur rounded-pill px-3 py-1 border border-white border-opacity-30 small text-white fw-bold d-flex align-items-center gap-2 shadow-sm">
-                                <span>📅</span> 7-Day Consistency
+                            <div className="bg-white bg-opacity-80 backdrop-blur rounded-pill px-3 py-1 border border-white border-opacity-60 small text-dark fw-bold d-flex align-items-center gap-2 shadow-sm">
+                                <span>📅</span> 7-Day Consistency: {consistency}%
                             </div>
                         </div>
                     </div>

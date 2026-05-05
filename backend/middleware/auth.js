@@ -1,6 +1,7 @@
 const { verifyJwt } = require('../config/jwt');
+const { query } = require('../config/db');
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
     const authHeader = req.header('Authorization');
     if (!authHeader) {
         return res.status(401).json({ message: 'No token, authorization denied' });
@@ -13,6 +14,11 @@ module.exports = (req, res, next) => {
         }
 
         const decoded = verifyJwt(token);
+        const userResult = await query('SELECT 1 FROM "Users" WHERE "UserID" = $1', [decoded.user.id]);
+        if (userResult.rowCount === 0) {
+            return res.status(401).json({ message: 'Account not found. Please log in again.' });
+        }
+
         req.user = decoded.user;
         next();
     } catch (err) {

@@ -1,4 +1,5 @@
 const { getPool, query } = require('../config/db');
+const { logActivity } = require('../utils/activity');
 
 const createMealPlan = async (req, res) => {
     const { date } = req.body;
@@ -16,6 +17,12 @@ const createMealPlan = async (req, res) => {
             [req.user.id, date]
         );
 
+        await logActivity({
+            userId: req.user.id,
+            type: 'MEALPLAN_CREATED',
+            detail: `Meal plan created for ${date}`
+        });
+
         return res.json({ mealPlanId: result.rows[0].MealPlanID });
     } catch (err) {
         console.error('Error creating meal plan:', err);
@@ -27,10 +34,26 @@ const addFoodToMealPlan = async (req, res) => {
     const { mealPlanId, foodId, quantity = 1, mealType = 'Lunch' } = req.body;
 
     try {
+        const ownership = await query(
+            'SELECT 1 FROM "MealPlans" WHERE "MealPlanID" = $1 AND "UserID" = $2',
+            [mealPlanId, req.user.id]
+        );
+
+        if (ownership.rowCount === 0) {
+            return res.status(403).json({ message: 'Not authorized to modify this meal plan' });
+        }
+
         await query(
             'INSERT INTO "MealPlanFoods" ("MealPlanID", "FoodID", "Quantity", "MealType") VALUES ($1, $2, $3, $4)',
             [mealPlanId, foodId, quantity, mealType]
         );
+
+        await logActivity({
+            userId: req.user.id,
+            type: 'MEALPLAN_ITEM_ADDED',
+            detail: `Added food ${foodId} to ${mealType}`,
+            meta: { mealPlanId, foodId, quantity, mealType }
+        });
 
         return res.json({ message: 'Food added to meal plan' });
     } catch (err) {
@@ -193,6 +216,12 @@ const replaceTodayWithSavedPlan = async (req, res) => {
         );
 
         await client.query('COMMIT');
+        await logActivity({
+            userId: req.user.id,
+            type: 'MEALPLAN_APPLIED',
+            detail: `Applied saved plan ${planId} to ${date}`,
+            meta: { planId, date }
+        });
         return res.json({ message: 'Saved plan applied successfully', mealPlanId });
     } catch (err) {
         await client.query('ROLLBACK');

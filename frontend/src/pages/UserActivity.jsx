@@ -1,15 +1,63 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Activity, Clock, User, Filter } from 'lucide-react';
+import { adminService } from '../services/api';
 import '../styles/Admin.css';
 
 const UserActivity = () => {
-    const activities = [
-        { id: 1, user: 'Admin', action: 'System Backup', time: '2 mins ago', icon: <Activity size={18} /> },
-        { id: 2, user: 'JohnDoe', action: 'Updated Profile', time: '15 mins ago', icon: <User size={18} /> },
-        { id: 3, user: 'JaneSmith', action: 'Created Meal Plan', time: '1 hour ago', icon: <Clock size={18} /> },
-        { id: 4, user: 'MikeRoss', action: 'Logged Nutrition', time: '3 hours ago', icon: <Activity size={18} /> },
-    ];
+    const [activities, setActivities] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchActivity = async () => {
+            try {
+                const res = await adminService.getActivity();
+                setActivities(res.data || []);
+            } catch (err) {
+                console.error('Activity load failed', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchActivity();
+    }, []);
+
+    const formattedActivities = useMemo(() => {
+        return activities.map((item, index) => {
+            const timestamp = item.CreatedAt ? new Date(item.CreatedAt).toLocaleString() : 'Unknown time';
+            const detail = item.Type === 'USER_REGISTERED'
+                ? 'Created an account'
+                : item.Type === 'PLAN_SAVED'
+                    ? `Saved plan: ${item.Detail}`
+                    : item.Type === 'ARTICLE_CREATED'
+                        ? `Published article: ${item.Detail}`
+                        : item.Detail || 'Activity recorded';
+
+            return {
+                id: `${item.Type}-${index}`,
+                user: item.Actor || 'System',
+                action: detail,
+                time: timestamp,
+                icon: item.Type === 'USER_REGISTERED' ? <User size={18} /> : item.Type === 'PLAN_SAVED' ? <Clock size={18} /> : <Activity size={18} />,
+                rawType: item.Type
+            };
+        });
+    }, [activities]);
+
+    const breakdown = useMemo(() => {
+        const total = formattedActivities.length || 1;
+        const counts = formattedActivities.reduce((acc, item) => {
+            acc[item.rawType] = (acc[item.rawType] || 0) + 1;
+            return acc;
+        }, {});
+
+        return [
+            { label: 'Registrations', value: Math.round(((counts.USER_REGISTERED || 0) / total) * 100), color: 'var(--bb-emerald-500)' },
+            { label: 'Plan Saves', value: Math.round(((counts.PLAN_SAVED || 0) / total) * 100), color: 'var(--bb-amber-500)' },
+            { label: 'Articles', value: Math.round(((counts.ARTICLE_CREATED || 0) / total) * 100), color: 'var(--bb-orange-500)' }
+        ];
+    }, [formattedActivities]);
 
     return (
         <div className="admin-container">
@@ -29,7 +77,13 @@ const UserActivity = () => {
                 <div className="col-12 col-xl-8">
                     <div className="bb-chart-card">
                         <div className="timeline-container">
-                            {activities.map((item, idx) => (
+                            {loading && (
+                                <div className="text-center py-5 text-muted">Loading activity...</div>
+                            )}
+                            {!loading && formattedActivities.length === 0 && (
+                                <div className="text-center py-5 text-muted">No activity logged yet.</div>
+                            )}
+                            {formattedActivities.map((item, idx) => (
                                 <motion.div 
                                     key={item.id}
                                     className="activity-item d-flex gap-4 mb-4 position-relative"
@@ -61,18 +115,14 @@ const UserActivity = () => {
                         <h5 className="fw-black mb-3">Live Status</h5>
                         <div className="d-flex align-items-center gap-3 mb-4">
                             <div className="pulse-dot"></div>
-                            <span className="fw-bold">Active Sessions: 12</span>
+                            <span className="fw-bold">Recent Events: {formattedActivities.length}</span>
                         </div>
                         <p className="small opacity-90">System is processing activities normally. No anomalies detected in the last 24 hours.</p>
                     </div>
 
                     <div className="bb-chart-card">
                         <h5 className="fw-black mb-3">Activity Breakdown</h5>
-                        {[
-                            { label: 'Nutrition Logs', value: 75, color: 'var(--bb-emerald-500)' },
-                            { label: 'Profile Edits', value: 15, color: 'var(--bb-amber-500)' },
-                            { label: 'Security Events', value: 10, color: 'var(--bb-orange-500)' }
-                        ].map((stat, i) => (
+                        {breakdown.map((stat, i) => (
                             <div key={i} className="mb-3">
                                 <div className="d-flex justify-content-between small fw-bold mb-1">
                                     <span>{stat.label}</span>

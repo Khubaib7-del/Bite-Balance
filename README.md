@@ -55,8 +55,44 @@ To run this application locally, you should use two separate terminals (or a spl
    ```
    *The app will automatically open at `http://localhost:3000` (or `3002` if port 3000 is busy).*
 
-## Hosting & Deployment
-Because the backend uses a local MS SQL database, traditional hosting like Vercel requires some additional steps. See the [Hosting Guide](file:///C:/Users/T%20L%20S/.gemini/antigravity/brain/55386a65-2e1b-439f-b352-ba96a0a955cd/hosting_guide.md) for full details.
+## Hosting & Deployment (Vercel)
+
+This project can be deployed on Vercel as a single project (frontend + backend API). The backend expects a PostgreSQL database.
+
+### Required Environment Variables
+Set these in Vercel Project Settings:
+
+- `DB_HOST`
+- `DB_PORT`
+- `DB_USER`
+- `DB_PASSWORD`
+- `DB_NAME`
+- `JWT_SECRET`
+- `DB_ADMIN_DB` (optional, defaults to `postgres`)
+- `NODE_ENV=production`
+
+### Deploy Steps
+1. Import the repository into Vercel.
+2. Keep the root `vercel.json` as-is (it routes `/api/*` to the backend and serves the React build).
+3. Set the environment variables above.
+4. Trigger a deploy.
+
+### Notes
+- The backend auto-creates the database if it does not exist (requires permissions on `DB_ADMIN_DB`).
+- The frontend uses `/api` as its base path, which matches the Vercel routing rules.
+
+## Seed Admin (Optional)
+
+You can create a local admin user with:
+
+```bash
+cd backend
+set SEED_ADMIN_EMAIL=admin@example.com
+set SEED_ADMIN_PASSWORD=StrongPasswordHere
+set SEED_ADMIN_USERNAME=admin
+npm run seed-admin
+```
+
 
 ## API Documentation
 

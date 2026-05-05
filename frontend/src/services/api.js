@@ -85,6 +85,8 @@ export const adminService = {
     getUsers: () => api.get('/admin/users'),
     updateUser: (id, data) => api.put(`/admin/users/${id}`, data),
     deleteUser: (id) => api.delete(`/admin/users/${id}`),
+    getActivity: () => api.get('/admin/activity'),
+    getSystemStatus: () => api.get('/admin/system-status'),
     getArticles: () => api.get('/admin/articles'),
     createArticle: (data) => api.post('/admin/articles', data),
     deleteArticle: (id) => api.delete(`/admin/articles/${id}`),
@@ -94,7 +96,8 @@ export const adminService = {
 
 export const userService = {
     getProfile: () => api.get('/user/profile'),
-    updateProfile: (data) => api.post('/user/profile', data)
+    updateProfile: (data) => api.post('/user/profile', data),
+    getNotifications: () => api.get('/user/notifications')
 };
 
 export default api;

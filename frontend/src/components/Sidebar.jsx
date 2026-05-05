@@ -14,6 +14,7 @@ import {
     Settings,
     User,
     Bell,
+    Zap,
     Activity,
     Users,
     Server
@@ -36,6 +37,8 @@ const Sidebar = ({ onLogout, collapsed, showMobile, toggleMobile }) => {
         { name: 'Food Search', path: '/search', icon: <Search size={20} /> },
         { name: 'Analytics', path: '/summary', icon: <PieChart size={20} /> },
         { name: 'Saved Plans', path: '/saved-plans', icon: <BookOpen size={20} /> },
+        { name: 'Calculators', path: '/calculators', icon: <Zap size={20} /> },
+        { name: 'Notifications', path: '/notifications', icon: <Bell size={20} /> }
     ];
 
     const adminNavItems = [
@@ -143,6 +146,11 @@ const Sidebar = ({ onLogout, collapsed, showMobile, toggleMobile }) => {
                         {adminNavItems.map(renderNavLink)}
                     </div>
                 )}
+
+                <div className="admin-sidebar-section">
+                    <div className="admin-sidebar-label">Workspace</div>
+                    {userNavItems.map(renderNavLink)}
+                </div>
 
                 <div className="admin-sidebar-section">
                     <div className="admin-sidebar-label">Account</div>

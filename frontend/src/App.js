@@ -104,7 +104,11 @@ const App = () => {
           <Route path="/summary" element={<ProtectedRoute token={token} handleLogout={handleLogout}><NutritionSummary /></ProtectedRoute>} />
           <Route path="/calculators" element={<ProtectedRoute token={token} handleLogout={handleLogout}><Calculators /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute token={token} handleLogout={handleLogout}><Notifications /></ProtectedRoute>} />
+          <Route path="/planner-home" element={<ProtectedRoute token={token} handleLogout={handleLogout}><PlannerHome /></ProtectedRoute>} />
           <Route path="/admin" element={<AdminRoute token={token} handleLogout={handleLogout}><AdminDashboard /></AdminRoute>} />
+          <Route path="/admin/users" element={<AdminRoute token={token} handleLogout={handleLogout}><ManageUsers /></AdminRoute>} />
+          <Route path="/admin/activity" element={<AdminRoute token={token} handleLogout={handleLogout}><UserActivity /></AdminRoute>} />
+          <Route path="/admin/status" element={<AdminRoute token={token} handleLogout={handleLogout}><SystemStatus /></AdminRoute>} />
           <Route path="/profile" element={<ProtectedRoute token={token} handleLogout={handleLogout}><Profile /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute token={token} handleLogout={handleLogout}><Settings /></ProtectedRoute>} />
 
