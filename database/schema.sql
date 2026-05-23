@@ -134,3 +134,111 @@ INSERT INTO "SystemSettings" ("SettingKey", "SettingValue")
 VALUES ('AdminRegistrationCode', 'ADMIN123')
 ON CONFLICT ("SettingKey") DO NOTHING;
 
+-- =============================================
+-- =============================================
+
+-- 1. VIEWS
+-- View to get complete user details
+CREATE OR REPLACE VIEW "vw_UserProfileDetails" AS
+SELECT 
+    u."UserID",
+    u."Username",
+    u."Email",
+    u."Role",
+    u."CreatedAt" as "AccountCreated",
+    p."Weight",
+    p."Height",
+    p."Age",
+    p."Gender",
+    p."Goal",
+    p."ActivityLevel"
+FROM "Users" u
+LEFT JOIN "UserProfiles" p ON u."UserID" = p."UserID";
+
+-- 2. STORED PROCEDURES (with Transactions & Logic)
+-- Procedure for User Registration
+CREATE OR REPLACE PROCEDURE "sp_RegisterUser"(
+    p_username VARCHAR(50),
+    p_email VARCHAR(100),
+    p_password_hash TEXT,
+    p_role VARCHAR(20),
+    OUT p_user_id INT,
+    OUT p_message TEXT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- Back-end Validation Checks
+    IF p_username IS NULL OR p_username = '' THEN
+        p_message := 'Error: Username is required.';
+        RETURN;
+    END IF;
+
+    IF p_email NOT LIKE '%_@__%.__%' THEN
+        p_message := 'Error: Invalid email format.';
+        RETURN;
+    END IF;
+
+    -- Check for existing email
+    IF EXISTS (SELECT 1 FROM "Users" WHERE "Email" = p_email) THEN
+        p_message := 'Error: Email already registered.';
+        RETURN;
+    END IF;
+
+    -- Transactional Insert
+    INSERT INTO "Users" ("Username", "Email", "PasswordHash", "Role")
+    VALUES (p_username, p_email, p_password_hash, p_role)
+    RETURNING "UserID" INTO p_user_id;
+
+    -- Create empty profile automatically (Transactional Part 2)
+    INSERT INTO "UserProfiles" ("UserID")
+    VALUES (p_user_id);
+
+    p_message := 'Success: User registered.';
+
+EXCEPTION WHEN OTHERS THEN
+    p_message := 'Error: Transaction failed. ' || SQLERRM;
+    p_user_id := NULL;
+END;
+$$;
+
+-- Function for Login Validation
+CREATE OR REPLACE FUNCTION "fn_ValidateLogin"(
+    p_email VARCHAR(100)
+)
+RETURNS TABLE (
+    "UserID" INT,
+    "Username" VARCHAR(50),
+    "PasswordHash" TEXT,
+    "Role" VARCHAR(20)
+) 
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT u."UserID", u."Username", u."PasswordHash", u."Role"
+    FROM "Users" u
+    WHERE u."Email" = p_email;
+END;
+$$;
+
+-- 3. TRIGGERS
+-- Function for Trigger
+CREATE OR REPLACE FUNCTION "fn_LogNewUser"()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO "UserActivity" ("UserID", "Type", "Detail")
+    VALUES (NEW."UserID", 'USER_REGISTERED', 'A new user account was created.');
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger: After User Insert
+DROP TRIGGER IF EXISTS "tr_AfterUserInsert" ON "Users";
+CREATE TRIGGER "tr_AfterUserInsert"
+AFTER INSERT ON "Users"
+FOR EACH ROW
+EXECUTE FUNCTION "fn_LogNewUser"();
+
+
+

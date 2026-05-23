@@ -58,7 +58,7 @@ const FoodSearch = () => {
                     ? await foodService.searchFoods(query)
                     : await foodService.getAllFoods();
 
-                setFoods(query ? res.data : res.data.slice(0, 12));
+                setFoods(res.data);
             } catch (err) {
                 console.error(err);
             } finally {
